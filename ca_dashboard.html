@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accolet IndiaGST! - CA Operations Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #e8eff3;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #475569;
+            --teal-main: #18a084;
+            --teal-light: #e6f5f2;
+            --navy-main: #142433;
+            --blue-main: #2b74c9;
+            --blue-light: #ebf3fe;
+            --red-main: #e11d48;
+            --amber-main: #d97706;
+            --green-main: #059669;
+            --border-soft: #cbd5e1;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-body); color: var(--text-dark);
+            font-family: 'Book Antiqua', Georgia, serif; -webkit-font-smoothing: antialiased;
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+        }
+        .sans-font { font-family: 'Inter', sans-serif; }
+
+        /* HEADER */
+        .fixed-header-wrapper { background: var(--navy-main); flex-shrink: 0; }
+        .top-bar {
+            background: linear-gradient(to right, var(--teal-main), var(--blue-main));
+            color: #ffffff; padding: 4px 2rem; display: flex; justify-content: space-between;
+            font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600;
+        }
+        .hero-header { padding: 0.5rem 2rem; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .hero-title { font-size: 1.5rem; margin: 0 0 4px 0; }
+        .header-controls { display: flex; gap: 8px; align-items: center; }
+        
+        .filter-select {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white; padding: 4px 8px; border-radius: 4px; font-family: 'Inter', sans-serif;
+            font-size: 0.8rem; outline: none; cursor: pointer;
+        }
+        .filter-select option { color: var(--text-dark); background: white; }
+
+        .client-badge { background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); }
+
+        /* MAIN TABS */
+        .tabs-container { background: white; padding: 0 2rem; display: flex; border-bottom: 1px solid var(--border-soft); }
+        .tab-link {
+            background: none; border: none; padding: 0.6rem 0.8rem; font-family: 'Book Antiqua', serif;
+            font-weight: bold; font-size: 0.95rem; color: var(--text-muted); cursor: pointer;
+            border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap;
+        }
+        .tab-link:hover { color: var(--navy-main); }
+        .tab-link.active { color: var(--teal-main); border-bottom-color: var(--teal-main); }
+
+        /* SUB TABS */
+        .sub-tabs-container { display: flex; gap: 4px; margin-bottom: 0.5rem; padding-bottom: 4px; }
+        .sub-tab-link { 
+            background: none; border: 1px solid transparent; padding: 0.3rem 0.6rem; font-family: 'Inter', sans-serif; 
+            font-weight: 600; font-size: 0.75rem; color: var(--text-muted); cursor: pointer; border-radius: 4px; transition: 0.2s; 
+        }
+        .sub-tab-link:hover { background: var(--bg-body); color: var(--navy-main); }
+        .sub-tab-link.active-sub { background: var(--blue-light); color: var(--blue-main); border: 1px solid var(--blue-main); }
+
+        /* MAIN CONTENT */
+        .main-container { padding: 0.8rem 2rem; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
+        
+        .tab-content { display: none; height: 100%; flex-direction: column; }
+        .tab-content.active { display: flex; animation: fadeIn 0.2s ease-out; }
+        
+        .sub-tab-content { display: none; flex-grow: 1; flex-direction: column; min-height: 0; }
+        .sub-tab-content.active { display: flex; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* CARDS & TABLES */
+        .card { background: var(--card-bg); border-radius: 6px; padding: 0.8rem; border: 1px solid var(--border-soft); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .table-container {
+            background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-soft); overflow-y: auto; flex-grow: 1;
+        }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; font-family: 'Inter', sans-serif; }
+        th { background: #f1f5f9; color: var(--navy-main); font-weight: 600; text-align: left; padding: 0.6rem; border-bottom: 1px solid var(--border-soft); font-size: 0.75rem; position: sticky; top: 0; z-index: 10; }
+        td { padding: 0.6rem; border-bottom: 1px solid var(--border-soft); font-size: 0.8rem; vertical-align: middle; background: white; }
+        
+        .btn {
+            font-family: 'Inter', sans-serif; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: 600;
+            font-size: 0.75rem; cursor: pointer; border: none; transition: 0.2s; white-space: nowrap;
+        }
+        .btn-sm { padding: 0.2rem 0.4rem; font-size: 0.7rem; }
+        .btn-primary { background: var(--blue-main); color: white; }
+        .btn-primary:hover { background: #1e5ba3; }
+        .btn-teal { background: var(--teal-main); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border-soft); color: var(--text-dark); }
+        .btn-danger-outline { background: white; border: 1px solid var(--red-main); color: var(--red-main); }
+
+        .status-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
+        .badge-amber { background: var(--amber-light); color: var(--amber-main); border: 1px solid var(--amber-main);}
+        .badge-red { background: var(--red-light); color: var(--red-main); border: 1px solid var(--red-main);}
+        .badge-green { background: #ecfdf5; color: var(--green-main); border: 1px solid var(--green-main);}
+        
+        .workspace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        
+        /* THIN UPLOAD BANNER */
+        .thin-upload-banner {
+            border: 1px dashed var(--border-soft); border-radius: 6px; padding: 0.6rem 1rem; 
+            background: #f8fafc; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;
+        }
+
+        /* GRID FOR PORTAL VIEWS */
+        .portal-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; overflow-y: auto; padding: 2px;
+        }
+        .portal-box {
+            background: white; border: 1px solid var(--border-soft); border-top: 3px solid var(--blue-main);
+            border-radius: 4px; padding: 0.6rem; display: flex; flex-direction: column;
+        }
+        .portal-box-title { font-size: 0.75rem; font-weight: bold; color: var(--navy-main); margin-bottom: 4px; }
+        .portal-box-desc { font-family: 'Inter', sans-serif; font-size: 0.7rem; color: var(--text-muted); flex-grow: 1; }
+        .portal-box-val { font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: bold; color: var(--blue-main); margin-top: 4px; text-align: right; border-top: 1px solid #f1f5f9; padding-top: 4px;}
+
+        .portal-grid-3b {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="fixed-header-wrapper">
+        <div class="top-bar">
+            <div><strong>Accolet IndiaGST!</strong> — CA Operations Portal</div>
+            <div>l4.preparer@accolet.com &nbsp;|&nbsp; Logout</div>
+        </div>
+
+        <div class="hero-header">
+            <div>
+                <h1 class="hero-title">CA Working Dashboard</h1>
+                <div class="header-controls">
+                    <select class="filter-select" style="font-weight: bold; background: white; color: var(--navy-main);">
+                        <option>Active Client: Epson Limited</option>
+                        <option>Active Client: Acme Corp</option>
+                    </select>
+                    <select class="filter-select">
+                        <option>May 2026</option>
+                        <option>April 2026</option>
+                    </select>
+                </div>
+            </div>
+            <div class="client-badge">
+                <div style="font-size: 0.7rem; color: rgba(255,255,255,0.7); font-family: 'Inter', sans-serif; text-transform: uppercase;">Logged In As</div>
+                <div style="font-size: 1.1rem; font-weight: bold;">L4</div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <button class="tab-link active" onclick="openTab(event, 'tab-overview')">1. Client Overview</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-gstr1')">2. GSTR-1</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-gstr3b')">3. GSTR-3B</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-gstr6')">4. GSTR-6</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-gstr9')">5. GSTR-9 & 9C</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-tasks')">6. Inbox</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-advice')">7. Queries</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+
+        <!-- TAB 1: OVERVIEW -->
+        <div id="tab-overview" class="tab-content active">
+            <div class="workspace-header">
+                <h2 style="margin: 0; color: var(--navy-main); font-size: 1.2rem;">Compliance Status: Epson Limited</h2>
+                <button class="btn btn-primary">Sync Latest Data from GSTN</button>
+            </div>
+            <div class="table-container" style="height: 150px; flex-grow: 0; margin-bottom: 0.8rem;">
+                <table>
+                    <thead><tr><th>GSTIN</th><th>State</th><th>Filing Status</th><th>Pending Actions</th></tr></thead>
+                    <tbody>
+                        <tr><td class="sans-font">27AABCU9603R1ZX</td><td>Maharashtra</td><td><span class="status-badge badge-amber">GSTR-1 Due</span></td><td style="color:var(--red-main); font-weight:bold; font-size: 0.8rem;">42 IMS Invoices</td></tr>
+                        <tr><td class="sans-font">29BBDCU9603R2YY</td><td>Karnataka</td><td><span class="status-badge badge-green">Filed</span></td><td style="color:var(--text-muted); font-size: 0.8rem;">None</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div style="display: flex; gap: 0.8rem; flex-grow: 1;">
+                <div class="card" style="flex: 1;"><h3 style="margin-top:0; font-size: 0.9rem;">Pending Reconciliations</h3><p class="sans-font" style="font-size:1.8rem; font-weight:bold; color:var(--red-main); margin:0;">14</p></div>
+                <div class="card" style="flex: 1;"><h3 style="margin-top:0; font-size: 0.9rem;">Notices Deadlines (< 7 days)</h3><p class="sans-font" style="font-size:1.8rem; font-weight:bold; color:var(--amber-main); margin:0;">2</p></div>
+                <div class="card" style="flex: 1;"><h3 style="margin-top:0; font-size: 0.9rem;">Unread Client Messages</h3><p class="sans-font" style="font-size:1.8rem; font-weight:bold; color:var(--blue-main); margin:0;">1</p></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: GSTR-1 WORKSPACE -->
+        <div id="tab-gstr1" class="tab-content">
+            <div class="workspace-header">
+                <h2 style="margin: 0; color: var(--navy-main); font-size: 1.2rem;">GSTR-1 Preparation</h2>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-outline">⬇️ Govt Utility Excel</button>
+                    <button class="btn btn-teal" onclick="sendToReview('GSTR-1')">➡️ Send to L3 for Review</button>
+                </div>
+            </div>
+            
+            <div class="sub-tabs-container">
+                <button class="sub-tab-link gstr1-link active-sub" onclick="openSubTab(event, 'gstr1-import', 'gstr1')">Import & Prepare</button>
+                <button class="sub-tab-link gstr1-link" onclick="openSubTab(event, 'gstr1-portal', 'gstr1')">Govt Portal View (13 Sections)</button>
+            </div>
+
+            <!-- Sub Tab 1: Import -->
+            <div id="gstr1-import" class="sub-tab-content gstr1-content active">
+                <div class="thin-upload-banner">
+                    <div>
+                        <strong style="color: var(--navy-main); font-size: 0.85rem; font-family: 'Inter', sans-serif;">Upload Sales Register (Excel)</strong>
+                        <input type="file" style="margin-left: 10px; font-size: 0.75rem; font-family: 'Inter', sans-serif;">
+                    </div>
+                    <button class="btn btn-primary btn-sm">⬆️ Import & Validate</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Invoice No.</th><th>Date</th><th>Customer GSTIN</th><th>Taxable Value</th><th>Status</th><th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="sans-font">INV/26/001</td><td class="sans-font">12-May</td><td class="sans-font">27XXXZZ9999Z1Z1</td><td class="sans-font">₹ 1,50,000</td>
+                                <td><span class="status-badge badge-green">Valid B2B</span></td>
+                                <td><button class="btn btn-outline btn-sm">👁️ View</button> <button class="btn btn-danger-outline btn-sm">🗑️</button></td>
+                            </tr>
+                            <tr style="background: var(--red-light);">
+                                <td class="sans-font">INV/26/002</td><td class="sans-font">14-May</td><td class="sans-font text-red"><strong>INVALID_FORMAT</strong></td><td class="sans-font">₹ 45,000</td>
+                                <td><span class="status-badge badge-red">Error: Checksum</span></td>
+                                <td><button class="btn btn-primary btn-sm">✏️ Edit</button> <button class="btn btn-danger-outline btn-sm">🗑️</button></td>
+                            </tr>
+                            <tr>
+                                <td class="sans-font">INV/26/003</td><td class="sans-font">15-May</td><td class="sans-font">Unregistered</td><td class="sans-font">₹ 12,000</td>
+                                <td><span class="status-badge badge-green">Valid B2CS</span></td>
+                                <td><button class="btn btn-outline btn-sm">👁️ View</button> <button class="btn btn-danger-outline btn-sm">🗑️</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+                    <button class="btn btn-teal" onclick="sendToReview('GSTR-1')">📤 Send to Client</button>
+                </div>
+            </div>
+
+            <!-- Sub Tab 2: Portal View 13 Sections -->
+            <div id="gstr1-portal" class="sub-tab-content gstr1-content">
+                <div class="portal-grid">
+                    <div class="portal-box"><div class="portal-box-title">4A, 4B, 4C, 6B, 6C</div><div class="portal-box-desc">B2B Invoices</div><div class="portal-box-val">₹ 1,50,000</div></div>
+                    <div class="portal-box"><div class="portal-box-title">5A, 5B</div><div class="portal-box-desc">B2C (Large) Invoices</div><div class="portal-box-val">₹ 0</div></div>
+                    <div class="portal-box"><div class="portal-box-title">6A</div><div class="portal-box-desc">Exports Invoices</div><div class="portal-box-val">₹ 45,000</div></div>
+                    <div class="portal-box"><div class="portal-box-title">7</div><div class="portal-box-desc">B2C (Others)</div><div class="portal-box-val">₹ 12,000</div></div>
+                    <div class="portal-box"><div class="portal-box-title">8A, 8B, 8C, 8D</div><div class="portal-box-desc">Nil Rated Supplies</div><div class="portal-box-val">₹ 0</div></div>
+                    <div class="portal-box"><div class="portal-box-title">9B</div><div class="portal-box-desc">Credit / Debit Notes (Registered)</div><div class="portal-box-val">₹ 5,000</div></div>
+                    <div class="portal-box"><div class="portal-box-title">9B</div><div class="portal-box-desc">Credit / Debit Notes (Unregistered)</div><div class="portal-box-val">₹ 0</div></div>
+                    <div class="portal-box"><div class="portal-box-title">11A(1), 11A(2)</div><div class="portal-box-desc">Tax Liability (Advances Received)</div><div class="portal-box-val">₹ 10,000</div></div>
+                    <div class="portal-box"><div class="portal-box-title">11B(1), 11B(2)</div><div class="portal-box-desc">Adjustment of Advances</div><div class="portal-box-val">₹ 0</div></div>
+                    <div class="portal-box"><div class="portal-box-title">12</div><div class="portal-box-desc">HSN-wise summary of outward supplies</div><div class="portal-box-val">₹ 2,07,000</div></div>
+                    <div class="portal-box"><div class="portal-box-title">13</div><div class="portal-box-desc">Documents Issued</div><div class="portal-box-val">42 Docs</div></div>
+                    <div class="portal-box"><div class="portal-box-title">14A</div><div class="portal-box-desc">Amendments to B2B</div><div class="portal-box-val">₹ 0</div></div>
+                    <div class="portal-box" style="border-top-color: var(--teal-main); background: var(--teal-light);"><div class="portal-box-title" style="color:var(--teal-main);">Total GSTR-1 Value</div><div class="portal-box-desc" style="color:var(--teal-main);">Net Outward Supply</div><div class="portal-box-val" style="color:var(--teal-main);">₹ 2,07,000</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: GSTR-3B WORKSPACE -->
+        <div id="tab-gstr3b" class="tab-content">
+            <div class="workspace-header">
+                <h2 style="margin: 0; color: var(--navy-main); font-size: 1.2rem;">GSTR-3B Preparation</h2>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-teal" onclick="sendToReview('GSTR-3B')">➡️ Send to L3 for Review</button>
+                </div>
+            </div>
+            
+            <div class="sub-tabs-container">
+                <button class="sub-tab-link gstr3b-link active-sub" onclick="openSubTab(event, 'gstr3b-import', 'gstr3b')">Import Purchase Register</button>
+                <button class="sub-tab-link gstr3b-link" onclick="openSubTab(event, 'gstr3b-2b', 'gstr3b')">Fetch GSTR-2B</button>
+                <button class="sub-tab-link gstr3b-link" onclick="openSubTab(event, 'gstr3b-reco', 'gstr3b')">Table 4 Reco</button>
+                <button class="sub-tab-link gstr3b-link" onclick="openSubTab(event, 'gstr3b-rcm', 'gstr3b')">RCM Liability</button>
+                <button class="sub-tab-link gstr3b-link" onclick="openSubTab(event, 'gstr3b-portal', 'gstr3b')">GSTR-3B Portal View</button>
+            </div>
+
+            <!-- 3B Sub 1 -->
+            <div id="gstr3b-import" class="sub-tab-content gstr3b-content active">
+                <div class="thin-upload-banner">
+                    <div>
+                        <strong style="color: var(--navy-main); font-size: 0.85rem; font-family: 'Inter', sans-serif;">Upload Purchase Register (Excel)</strong>
+                        <input type="file" style="margin-left: 10px; font-size: 0.75rem; font-family: 'Inter', sans-serif;">
+                    </div>
+                    <button class="btn btn-primary btn-sm">⬆️ Import Data</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Books Inv No</th><th>Date</th><th>Vendor GSTIN</th><th>ITC Amount</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <tr><td class="sans-font">PR-992</td><td class="sans-font">02-May</td><td class="sans-font">07AAACU9603R1ZZ</td><td class="sans-font">₹ 15,000</td><td><span class="status-badge badge-green">Ready</span></td></tr>
+                            <tr><td class="sans-font">PR-993</td><td class="sans-font">04-May</td><td class="sans-font">29BBDCU9603R2YY</td><td class="sans-font">₹ 8,500</td><td><span class="status-badge badge-green">Ready</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3B Sub 2 -->
+            <div id="gstr3b-2b" class="sub-tab-content gstr3b-content">
+                <div class="thin-upload-banner">
+                    <div><strong style="color: var(--navy-main); font-size: 0.85rem; font-family: 'Inter', sans-serif;">API Sync with GSTN</strong></div>
+                    <button class="btn btn-outline btn-sm">🔄 Fetch Latest 2B from Portal</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>GSTIN</th><th>Supplier Name</th><th>Invoice Count</th><th>Total ITC Available</th></tr></thead>
+                        <tbody>
+                            <tr><td class="sans-font">07AAACU9603R1ZZ</td><td>Alpha Pvt Ltd</td><td class="sans-font">1</td><td class="sans-font">₹ 15,000</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3B Sub 3 -->
+            <div id="gstr3b-reco" class="sub-tab-content gstr3b-content">
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Vendor GSTIN</th><th>Books Value</th><th>2B Value</th><th>Variance</th><th>Action</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td class="sans-font">07AAACU9603R1ZZ</td><td class="sans-font">₹ 15,000</td><td class="sans-font">₹ 15,000</td><td class="sans-font">₹ 0</td>
+                                <td><span class="status-badge badge-green">Exact Match</span></td>
+                            </tr>
+                            <tr style="background: var(--amber-light);">
+                                <td class="sans-font">29BBDCU9603R2YY</td><td class="sans-font">₹ 8,500</td><td class="sans-font">₹ 0</td><td class="sans-font text-red">₹ 8,500</td>
+                                <td><button class="btn btn-primary btn-sm">Defer ITC</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3B Sub 4 -->
+            <div id="gstr3b-rcm" class="sub-tab-content gstr3b-content">
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th>Expense Head</th><th>Amount Paid</th><th>RCM Applicable</th><th>Action</th></tr></thead>
+                        <tbody>
+                            <tr><td>Legal Fees (Advocate)</td><td class="sans-font">₹ 50,000</td><td class="sans-font text-red">₹ 9,000</td><td><button class="btn btn-outline btn-sm">Add to 3.1.d</button></td></tr>
+                            <tr><td>GTA Services</td><td class="sans-font">₹ 1,20,000</td><td class="sans-font text-red">₹ 6,000</td><td><button class="btn btn-outline btn-sm">Add to 3.1.d</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3B Sub 5: Portal View -->
+            <div id="gstr3b-portal" class="sub-tab-content gstr3b-content">
+                <div class="portal-grid-3b">
+                    <div class="card" style="padding: 0.8rem;">
+                        <div style="font-size: 0.8rem; font-weight: bold; color: var(--navy-main); border-bottom: 1px solid var(--border-soft); padding-bottom: 4px; margin-bottom: 4px;">3.1 Tax on Outward & RCM Inward</div>
+                        <table style="font-size: 0.7rem;">
+                            <tr><td>(a) Outward Taxable</td><td class="sans-font" style="text-align:right;">₹ 1,50,000</td></tr>
+                            <tr><td>(d) Inward RCM</td><td class="sans-font" style="text-align:right; color:var(--red-main);">₹ 15,000</td></tr>
+                        </table>
+                    </div>
+                    <div class="card" style="padding: 0.8rem;">
+                        <div style="font-size: 0.8rem; font-weight: bold; color: var(--navy-main); border-bottom: 1px solid var(--border-soft); padding-bottom: 4px; margin-bottom: 4px;">3.2 Interstate Supplies</div>
+                        <table style="font-size: 0.7rem;">
+                            <tr><td>Supplies to Unregistered</td><td class="sans-font" style="text-align:right;">₹ 12,000</td></tr>
+                        </table>
+                    </div>
+                    <div class="card" style="padding: 0.8rem;">
+                        <div style="font-size: 0.8rem; font-weight: bold; color: var(--navy-main); border-bottom: 1px solid var(--border-soft); padding-bottom: 4px; margin-bottom: 4px;">4. Eligible ITC</div>
+                        <table style="font-size: 0.7rem;">
+                            <tr><td>(A) ITC Available (All other)</td><td class="sans-font" style="text-align:right; color:var(--green-main);">₹ 15,000</td></tr>
+                            <tr><td>(B) ITC Reversed</td><td class="sans-font" style="text-align:right;">₹ 0</td></tr>
+                            <tr><td><strong style="color:var(--navy-main);">(C) Net ITC Available</strong></td><td class="sans-font" style="text-align:right; font-weight:bold;">₹ 15,000</td></tr>
+                        </table>
+                    </div>
+                    <div class="card" style="padding: 0.8rem;">
+                        <div style="font-size: 0.8rem; font-weight: bold; color: var(--navy-main); border-bottom: 1px solid var(--border-soft); padding-bottom: 4px; margin-bottom: 4px;">5. Exempt, Nil & Non-GST</div>
+                        <table style="font-size: 0.7rem;">
+                            <tr><td>From supplier under composition</td><td class="sans-font" style="text-align:right;">₹ 0</td></tr>
+                            <tr><td>Non-GST supply</td><td class="sans-font" style="text-align:right;">₹ 0</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: GSTR-6 (ISD) -->
+        <div id="tab-gstr6" class="tab-content">
+            <div class="workspace-header">
+                <h2 style="margin: 0; color: var(--navy-main); font-size: 1.2rem;">GSTR-6 (ISD) Workspace</h2>
+            </div>
+            <div class="thin-upload-banner">
+                <div>
+                    <strong style="color: var(--navy-main); font-size: 0.85rem; font-family: 'Inter', sans-serif;">Upload ISD Distribution Register (Excel)</strong>
+                    <input type="file" style="margin-left: 10px; font-size: 0.75rem; font-family: 'Inter', sans-serif;">
+                </div>
+                <button class="btn btn-primary btn-sm">⬆️ Import & Allocate</button>
+            </div>
+            <div class="table-container">
+                <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; font-family: 'Inter', sans-serif;">
+                    No ISD locations mapped for this GSTIN.
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: GSTR-9 & 9C -->
+        <div id="tab-gstr9" class="tab-content">
+            <div class="workspace-header">
+                <h2 style="margin: 0; color: var(--navy-main); font-size: 1.2rem;">GSTR-9 & 9C Annual Returns</h2>
+            </div>
+            <div class="table-container">
+                <table style="font-size: 0.8rem;">
+                    <thead><tr><th>Financial Year</th><th>Audit Status</th><th>GSTR-9 Draft</th><th>GSTR-9C Reco</th><th>Action</th></tr></thead>
+                    <tbody>
+                        <tr><td>FY 2024-25</td><td><span class="status-badge badge-green">Completed</span></td><td><button class="btn btn-outline btn-sm">View Filed</button></td><td><button class="btn btn-outline btn-sm">View Filed</button></td><td><span class="status-badge badge-green">Filed</span></td></tr>
+                        <tr><td>FY 2025-26</td><td><span class="status-badge badge-amber">Ongoing</span></td><td><button class="btn btn-primary btn-sm">Start Working</button></td><td><button class="btn btn-outline btn-sm">Upload GL</button></td><td><span class="status-badge badge-amber">Due Dec '26</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 6: TASKS & NOTICES -->
+        <div id="tab-tasks" class="tab-content">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Task ID</th><th>Client</th><th>Task Type</th><th>Deadline</th><th>Status</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="sans-font">TSK-101</td><td>Epson Limited</td><td>Reply to ASMT-10 Notice</td>
+                            <td class="sans-font text-red"><strong>05-Jun-2026</strong></td>
+                            <td><span class="status-badge badge-amber">Working</span></td>
+                            <td><button class="btn btn-primary btn-sm">Open Workspace</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 7: ADVICE REQUESTS -->
+        <div id="tab-advice" class="tab-content">
+            <h3 style="color: var(--navy-main); margin-top: 0; font-size: 1rem;">Client Queries (View Only - L2 CA to Reply)</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Ticket ID</th><th>Client</th><th>Subject</th><th>Status</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="sans-font">REQ-041</td><td>Epson Limited</td><td>Clarification on Rule 37 Reversal</td>
+                            <td><span class="status-badge badge-amber">Partner Reviewing</span></td>
+                            <td><button class="btn btn-outline btn-sm">👁️ View Thread</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Main Tabs
+        function openTab(evt, tabId) {
+            var tabContents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabContents.length; i++) tabContents[i].classList.remove("active");
+            var tabLinks = document.getElementsByClassName("tab-link");
+            for (var i = 0; i < tabLinks.length; i++) tabLinks[i].classList.remove("active");
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // Sub Tabs
+        function openSubTab(evt, tabId, groupClass) {
+            var tabContents = document.getElementsByClassName(groupClass + "-content");
+            for (var i = 0; i < tabContents.length; i++) tabContents[i].classList.remove("active");
+            var tabLinks = document.getElementsByClassName(groupClass + "-link");
+            for (var i = 0; i < tabLinks.length; i++) tabLinks[i].classList.remove("active-sub");
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active-sub");
+        }
+
+        // Demo Sync Logic
+        function sendToReview(docType) {
+            localStorage.setItem('demo_doc_status_' + docType, 'Pending Approval');
+            window.parent.postMessage({ type: 'SHOW_TOAST', message: `${docType} sent to Client Dashboard for Approval!` }, '*');
+        }
+
+        // Auto-functionalize all other buttons for the demo
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('button').forEach(btn => {
+                if(!btn.getAttribute('onclick')) {
+                    btn.onclick = function() {
+                        let actionText = this.innerText.replace(/[^\x00-\x7F]/g, '').trim();
+                        if(!actionText) actionText = "Action";
+                        if(window.parent !== window && window.parent.postMessage) {
+                            window.parent.postMessage({ type: 'SHOW_TOAST', message: `Executing: ${actionText}... Done!` }, '*');
+                        } else {
+                            alert(`Demo Action: ${actionText} executed successfully!`);
+                        }
+                    };
+                }
+            });
+        });
+    </script>
+</body>
+</html>

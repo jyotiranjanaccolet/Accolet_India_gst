@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accolet IndiaGST! - Premium Client Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Accolet Theme */
+            --bg-body: #e8eff3;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #475569;
+            
+            --teal-main: #18a084;
+            --teal-light: #e6f5f2;
+            --navy-main: #142433;
+            --blue-main: #2b74c9;
+            --blue-light: #ebf3fe;
+            
+            --red-main: #e11d48;
+            --red-light: #fff0f2;
+            --amber-main: #d97706;
+            --amber-light: #fffbeb;
+            --green-main: #059669;
+            --purple-main: #8b5cf6;
+            --purple-light: #ede9fe;
+            
+            --border-soft: #cbd5e1;
+        }
+
+        /* Prevent body scroll, everything fits in view */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            font-family: 'Book Antiqua', Georgia, serif;
+            -webkit-font-smoothing: antialiased;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sans-font {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* --- HEADER --- */
+        .fixed-header-wrapper {
+            background: var(--navy-main);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .top-bar {
+            background: linear-gradient(to right, var(--teal-main), var(--blue-main));
+            color: #ffffff;
+            padding: 6px 2rem;
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .hero-header {
+            padding: 1rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hero-title {
+            font-size: 1.8rem;
+            margin: 0 0 8px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .filter-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+        }
+        .filter-select option { color: var(--text-dark); background: white; }
+
+        .ca-badge {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .client-badge {
+            background: rgba(255,255,255,0.05);
+            padding: 0.8rem 1.2rem;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        /* --- TABS --- */
+        .tabs-container {
+            background: white;
+            padding: 0 2rem;
+            display: flex;
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        .tab-link {
+            background: none;
+            border: none;
+            padding: 0.8rem 1rem;
+            font-family: 'Book Antiqua', serif;
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .tab-link:hover { color: var(--navy-main); }
+        .tab-link.active { color: var(--teal-main); border-bottom-color: var(--teal-main); }
+
+        /* --- MAIN CONTENT CONTAINER --- */
+        .main-container {
+            padding: 1rem 2rem;
+            box-sizing: border-box;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { 
+            display: flex; 
+            flex-direction: column;
+            flex-grow: 1;
+            height: 100%;
+            animation: fadeIn 0.3s ease-out; 
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- CARDS --- */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .risk-red { border-top: 4px solid var(--red-main); background: linear-gradient(to bottom, var(--red-light) 0%, white 25%); }
+        .risk-amber { border-top: 4px solid var(--amber-main); background: linear-gradient(to bottom, var(--amber-light) 0%, white 25%); }
+        .risk-blue { border-top: 4px solid var(--blue-main); }
+        .risk-teal { border-top: 4px solid var(--teal-main); }
+        
+        .card-title { font-weight: bold; font-size: 1.15rem; color: var(--navy-main); margin-bottom: 0.5rem; }
+        .card-value { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+        .card-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.4; }
+
+        .chart-container { flex-grow: 1; width: 100%; margin-top: 0.5rem; position: relative; min-height: 0; }
+
+        /* --- BUTTONS --- */
+        .btn {
+            font-family: 'Inter', sans-serif;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: none;
+            display: inline-block;
+            text-align: center;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .btn-sm { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
+        
+        .btn-primary { background: var(--blue-main); color: white; }
+        .btn-primary:hover { background: #1e5ba3; }
+        .btn-teal { background: var(--teal-main); color: white; margin-top: auto;}
+        .btn-teal:hover { background: #128069; }
+        .btn-outline { background: white; border: 1px solid var(--border-soft); color: var(--text-dark); }
+        .btn-outline:hover { background: var(--bg-body); }
+        .btn-danger-outline { background: white; border: 1px solid var(--red-main); color: var(--red-main); }
+        .btn-danger-outline:hover { background: var(--red-light); }
+
+        /* --- TABLES --- */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+            overflow-x: auto;
+            overflow-y: auto;
+            height: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: var(--navy-main);
+            font-weight: 600;
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-soft);
+            font-size: 0.85rem;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-soft);
+            font-size: 0.9rem;
+            vertical-align: middle;
+            background: white;
+        }
+
+        /* Frozen Columns */
+        .sticky-col-1 { position: sticky; left: 0; width: 150px; min-width: 150px; z-index: 10; border-right: 1px solid var(--border-soft); }
+        .sticky-col-2 { position: sticky; left: 150px; width: 110px; min-width: 110px; z-index: 10; border-right: 2px solid var(--navy-main); }
+        th.sticky-col-1, th.sticky-col-2 { z-index: 30; }
+
+        .heatmap-table th { font-size: 0.75rem; white-space: nowrap; text-align: center;}
+        .heatmap-table td { text-align: center; font-weight: 600; font-size: 0.8rem; white-space: nowrap;}
+        .heatmap-table td.cell-red { background: var(--red-light); color: var(--red-main); }
+        .heatmap-table td.cell-amber { background: var(--amber-light); color: var(--amber-main); }
+        .heatmap-table td.cell-green { background: #ecfdf5; color: var(--green-main); }
+        .heatmap-table td.text-left { text-align: left; }
+        .heatmap-table th.text-left { text-align: left; }
+
+        .comment-box {
+            width: 100%;
+            border: 1px solid var(--border-soft);
+            border-radius: 4px;
+            padding: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            resize: none;
+            height: 50px;
+            box-sizing: border-box;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-amber { background: var(--amber-light); color: var(--amber-main); border: 1px solid var(--amber-main);}
+        .badge-red { background: var(--red-light); color: var(--red-main); border: 1px solid var(--red-main);}
+        .badge-green { background: #ecfdf5; color: var(--green-main); border: 1px solid var(--green-main);}
+        .badge-purple { background: var(--purple-light); color: var(--purple-main); border: 1px solid var(--purple-main);}
+
+        .text-red { color: var(--red-main); }
+        .text-teal { color: var(--teal-main); }
+        .text-amber { color: var(--amber-main); }
+        .text-blue { color: var(--blue-main); }
+        
+        /* --- KPI MODAL CSS --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+        .modal-content {
+            background: white;
+            width: 90%; max-width: 950px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            display: flex; flex-direction: column;
+            max-height: 85vh;
+            overflow: hidden;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+        @keyframes modalFadeIn { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-soft);
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-body);
+        }
+        .modal-body {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-soft);
+            background: var(--bg-body);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .modal-table {
+            width: 100%; border-collapse: collapse;
+        }
+        .modal-table th, .modal-table td {
+            padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-soft); text-align: left; font-size: 0.85rem;
+        }
+        .modal-table th { background: white; font-weight: 600; color: var(--navy-main); position: sticky; top: 0; border-bottom: 2px solid var(--border-soft); }
+        .close-btn { cursor: pointer; background: none; border: none; font-size: 1.5rem; color: var(--text-muted); line-height: 1; padding: 0 5px; }
+        .close-btn:hover { color: var(--red-main); }
+    </style>
+</head>
+<body>
+
+    <!-- FIXED HEADER -->
+    <div class="fixed-header-wrapper">
+        <div class="top-bar">
+            <div><strong>Accolet IndiaGST!</strong> — Premium Tax Intelligence</div>
+            <div>contact@accolet.com &nbsp;|&nbsp; +91 80 4190 0148 &nbsp;|&nbsp; Logout</div>
+        </div>
+
+        <div class="hero-header">
+            <div>
+                <h1 class="hero-title">Executive Risk & Action Dashboard</h1>
+                <div class="header-controls">
+                    <select class="filter-select">
+                        <option>GSTIN: All Locations</option>
+                        <option>GSTIN: 27AABCU9603R1ZX</option>
+                        <option>GSTIN: 07BBDCU9603R2YY</option>
+                    </select>
+                    <select class="filter-select">
+                        <option>May 2026</option>
+                        <option>April 2026</option>
+                    </select>
+                    <div class="ca-badge">
+                        <span>👤</span> Assigned CA: <strong>L2 CA</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="client-badge">
+                <div style="font-size: 1.5rem; font-weight: bold;">Epson Limited</div>
+            </div>
+        </div>
+
+        <!-- TABS NAVIGATION -->
+        <div class="tabs-container">
+            <button class="tab-link active" onclick="openTab(event, 'tab-multi')">1. Multi-GSTIN Overview</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-basic')">2. Basic Info</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-ai')">3. AI Intelligence</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-risk')">4. Risks & KPIs</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-workflow')">5. Pending Approvals</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-notices')">6. Orders & Notices</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-calendar')">7. Compliance Calendar</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-advice')">8. Seeking Advice</button>
+        </div>
+    </div>
+
+    <!-- MAIN FLEX CONTAINER -->
+    <div class="main-container">
+
+        <!-- TAB 1: MULTI-GSTIN OVERVIEW -->
+        <div id="tab-multi" class="tab-content active">
+            <!-- Heatmap Legend -->
+            <div style="display: flex; gap: 1.5rem; align-items: center; margin-bottom: 0.8rem; padding: 0 0.5rem; font-family: 'Inter', sans-serif; font-size: 0.85rem;">
+                <strong style="color: var(--navy-main); margin-right: 0.5rem;">Heatmap Guide:</strong>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: var(--red-main);"></span>
+                    <strong style="color: var(--navy-main);">Critical Risk</strong> <span style="color: var(--text-muted);">(Immediate Action Required)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: var(--amber-main);"></span>
+                    <strong style="color: var(--navy-main);">Needs Review</strong> <span style="color: var(--text-muted);">(Potential Leakage / Action needed)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: var(--green-main);"></span>
+                    <strong style="color: var(--navy-main);">Compliant</strong> <span style="color: var(--text-muted);">(Safe / Reconciled)</span>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="heatmap-table">
+                    <thead>
+                        <tr>
+                            <th class="text-left sticky-col-1">GSTIN</th>
+                            <th class="text-left sticky-col-2">State</th>
+                            <th style="min-width: 130px;">Missed Airlines ITC</th>
+                            <th style="min-width: 140px;">ITC Claimed vs Avail</th>
+                            <th style="min-width: 130px;">Import ITC Claimed</th>
+                            <th style="min-width: 140px;">Pending Reclaim ITC</th>
+                            <th style="min-width: 130px;">Pending IMS Invoices</th>
+                            <th style="min-width: 130px;">Unclaimed ITC (2B)</th>
+                            <th style="min-width: 140px;">GSTR-1 vs 3B Gap</th>
+                            <th style="min-width: 110px;">RCM Unpaid</th>
+                            <th style="min-width: 140px;">Rule 37 Risk (180d)</th>
+                            <th style="min-width: 130px;">Sec 17(5) Flagged</th>
+                            <th style="min-width: 120px;">Overall Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-left sticky-col-1">27AABCU9603R1ZX</td>
+                            <td class="text-left sticky-col-2">Maharashtra</td>
+                            <td class="cell-amber">₹ 42,500</td>
+                            <td class="cell-red">₹ 14,000</td>
+                            <td class="cell-green">₹ 3,45,000</td>
+                            <td class="cell-amber">₹ 85,000</td>
+                            <td class="cell-red">42</td>
+                            <td class="cell-amber">₹ 85,400</td>
+                            <td class="cell-red">₹ 12,450</td>
+                            <td class="cell-red">₹ 8,000</td>
+                            <td class="cell-red">₹ 34,200</td>
+                            <td class="cell-amber">₹ 15,500</td>
+                            <td><span class="status-badge badge-red">Critical</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-left sticky-col-1">29BBDCU9603R2YY</td>
+                            <td class="text-left sticky-col-2">Karnataka</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 1,12,000</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">0</td>
+                            <td class="cell-amber">₹ 12,500</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td><span class="status-badge badge-green">Compliant</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-left sticky-col-1">07AAACU9603R1ZZ</td>
+                            <td class="text-left sticky-col-2">Delhi</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-amber">₹ 4,500</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-amber">₹ 12,000</td>
+                            <td class="cell-red">14</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-amber">₹ 5,000</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td><span class="status-badge badge-amber">Review</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-left sticky-col-1">33CCDCU9603R3XX</td>
+                            <td class="text-left sticky-col-2">Tamil Nadu</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td><span class="status-badge badge-green">Compliant</span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-left sticky-col-1">24DDECU9603R4YY</td>
+                            <td class="text-left sticky-col-2">Gujarat</td>
+                            <td class="cell-amber">₹ 12,000</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">0</td>
+                            <td class="cell-amber">₹ 45,000</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td class="cell-green">₹ 0</td>
+                            <td><span class="status-badge badge-amber">Review</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: BASIC INFO -->
+        <div id="tab-basic" class="tab-content">
+            <div style="display: flex; flex-direction: column; gap: 1rem; height: 100%;">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; flex: 1;">
+                    <div class="card">
+                        <div class="card-desc" style="margin-bottom: 0.5rem;">Total Outward Supply (Sales)</div>
+                        <div class="card-value sans-font">₹ 45.2L</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-desc" style="margin-bottom: 0.5rem;">Total Inward Supply (Purchases)</div>
+                        <div class="card-value sans-font">₹ 28.4L</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-desc" style="margin-bottom: 0.5rem;">Total RCM Liability Generated</div>
+                        <div class="card-value sans-font text-red">₹ 45K</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-desc" style="margin-bottom: 0.5rem;">Net Tax Payable (Cash)</div>
+                        <div class="card-value sans-font text-amber">₹ 1.2L</div>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; flex: 2.5;">
+                    <div class="card">
+                        <div class="card-title">Tax Breakdown (IGST vs CGST vs SGST)</div>
+                        <div class="chart-container"><canvas id="taxChart"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Vendor Compliance (GSTR-2B Filers vs Non-Filers)</div>
+                        <div class="chart-container"><canvas id="vendorChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: AI INTELLIGENCE -->
+        <div id="tab-ai" class="tab-content">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; height: 100%;">
+                <div class="card risk-teal">
+                    <div class="card-title">Missed Airline ITC (GSTR-2B Scan)</div>
+                    <div class="card-value sans-font text-teal">₹ 42,500 <span style="font-size:1rem; font-weight:normal; color:var(--text-muted);">Found</span></div>
+                    <div class="card-desc" style="margin-bottom: 1.5rem;">AI scanned GSTR-2B and identified travel credits from Airline vendors missing from books.</div>
+                    <button class="btn btn-teal">Auto-Draft Missing ITC into Books</button>
+                </div>
+                <div class="card">
+                    <div class="card-title">ITC Categorised by Vendor Name/Sector</div>
+                    <div class="card-desc">Machine learning classifies your suppliers into standard business sectors to show you exactly where you spend.</div>
+                    <div class="chart-container"><canvas id="categoryChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: RISKS & RECONCILIATIONS -->
+        <div id="tab-risk" class="tab-content">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 1rem; height: 100%;">
+                <div class="card risk-red">
+                    <div class="card-title">ITC Claimed vs Available</div>
+                    <div class="card-value sans-font text-red">₹ 14,000 <span style="font-size:1rem; font-weight:normal;">Excess</span></div>
+                    <div class="card-desc">Claimed more ITC in 3B than available in 2B. Avoid notices.</div>
+                </div>
+                <div class="card risk-blue">
+                    <div class="card-title">Import ITC Claimed</div>
+                    <div class="card-value sans-font text-blue">₹ 3,45,000</div>
+                    <div class="card-desc">IGST claimed on import of goods matched with ICEGATE.</div>
+                </div>
+                <div class="card risk-amber">
+                    <div class="card-title">Reversed vs Reclaimed ITC</div>
+                    <div class="card-value sans-font text-amber">₹ 85,000 <span style="font-size:1rem; font-weight:normal;">Pending</span></div>
+                    <div class="card-desc">Temporary ITC reversals currently awaiting reclaim.</div>
+                </div>
+                <div class="card risk-red">
+                    <div class="card-title">Pending IMS Actions</div>
+                    <div class="card-value sans-font text-red">42 <span style="font-size:1rem; font-weight:normal;">Invoices</span></div>
+                    <div class="card-desc">Pending Accept/Reject. Warning: Will auto-accept soon!</div>
+                </div>
+                <div class="card risk-amber">
+                    <div class="card-title">Unclaimed ITC (GSTR-2B)</div>
+                    <div class="card-value sans-font text-amber">₹ 85,400</div>
+                    <div class="card-desc">Eligible credit in 2B not yet claimed. Working capital stuck.</div>
+                </div>
+                <div class="card risk-red">
+                    <div class="card-title">GSTR-1 vs 3B Liability Gap</div>
+                    <div class="card-value sans-font text-red">₹ 12,450 <span style="font-size:1rem; font-weight:normal;">Gap</span></div>
+                    <div class="card-desc">Sales tax declared in GSTR-1 is HIGHER than tax paid in 3B.</div>
+                </div>
+                <div class="card risk-red">
+                    <div class="card-title">RCM Liability vs Paid</div>
+                    <div class="card-value sans-font text-red">₹ 8,000 <span style="font-size:1rem; font-weight:normal;">Unpaid</span></div>
+                    <div class="card-desc">RCM accrued in books is greater than RCM paid in cash.</div>
+                </div>
+                <div class="card risk-red">
+                    <div class="card-title">Rule 37 Risk (>180 Days)</div>
+                    <div class="card-value sans-font text-red">₹ 34,200 <span style="font-size:1rem; font-weight:normal;">Reversal</span></div>
+                    <div class="card-desc">ITC claimed but vendor unpaid. Requires reversal with 18% int.</div>
+                </div>
+                <div class="card risk-amber">
+                    <div class="card-title">Sec 17(5) Blocked Credit</div>
+                    <div class="card-value sans-font text-amber">₹ 15,500 <span style="font-size:1rem; font-weight:normal;">Flagged</span></div>
+                    <div class="card-desc">AI engine flagged potential ineligible ITC claims for review.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: PENDING APPROVALS -->
+        <div id="tab-workflow" class="tab-content">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Return Type</th>
+                            <th style="min-width: 140px;">Files & Reports</th>
+                            <th style="width: 50%;">Client Feedback / Comments</th>
+                            <th style="min-width: 160px;">Approval Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div style="font-family: 'Book Antiqua', serif; font-size: 1.4rem; font-weight: bold; color: var(--navy-main);">GSTR-1</div>
+                                <div id="demo-gstr1-status" class="status-badge badge-red" style="margin: 8px 0;">Not Prepared</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">Due: 11-Jun-2026</div>
+                            </td>
+                            <td>
+                                <button class="btn btn-outline" style="width:100%; margin-bottom:8px;">📄 View Draft</button><br>
+                                <button class="btn btn-outline" style="width:100%;" onclick="downloadDirectCSV('GSTR-1_Working_Data.csv', 'Invoice No,Date,Customer GSTIN,Taxable Value,Status\nINV/26/001,12-May,27XXXZZ9999Z1Z1,150000,VALID B2B\nINV/26/003,15-May,Unregistered,12000,VALID B2CS\n')">⬇️ Download Excel</button>
+                            </td>
+                            <td><textarea class="comment-box" style="height: 60px;" placeholder="Add line-wise comments here..."></textarea></td>
+                            <td>
+                                <button class="btn btn-primary" style="width:100%; margin-bottom:8px;">✅ Approve</button><br>
+                                <button class="btn btn-danger-outline" style="width:100%;">❌ Send Back to L3</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="font-family: 'Book Antiqua', serif; font-size: 1.4rem; font-weight: bold; color: var(--navy-main);">GSTR-3B</div>
+                                <div id="demo-gstr3b-status" class="status-badge badge-red" style="margin: 8px 0;">Not Prepared</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">Due: 20-Jun-2026</div>
+                            </td>
+                            <td>
+                                <button class="btn btn-outline" style="width:100%; margin-bottom:8px;">📄 View Draft</button><br>
+                                <button class="btn btn-outline" style="width:100%;">⬇️ Working File</button>
+                            </td>
+                            <td><textarea class="comment-box" style="height: 60px;" placeholder="Add comments regarding ITC or Liability..."></textarea></td>
+                            <td>
+                                <button class="btn btn-primary" style="width:100%; margin-bottom:8px;" onclick="approveDoc(this, 'GSTR-3B')">✅ Approve</button><br>
+                                <button class="btn btn-danger-outline" style="width:100%;">❌ Send Back to L3</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div style="font-family: 'Book Antiqua', serif; font-size: 1.4rem; font-weight: bold; color: var(--navy-main);">GSTR-6</div>
+                                <div class="status-badge badge-amber" style="margin: 8px 0;">Pending Approval</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">Due: 13-Jun-2026</div>
+                            </td>
+                            <td>
+                                <button class="btn btn-outline" style="width:100%; margin-bottom:8px;">📄 View Draft</button><br>
+                                <button class="btn btn-outline" style="width:100%;">⬇️ Distribution Excel</button>
+                            </td>
+                            <td><textarea class="comment-box" style="height: 60px;" placeholder="Add comments regarding ISD distribution..."></textarea></td>
+                            <td>
+                                <button class="btn btn-primary" style="width:100%; margin-bottom:8px;" onclick="approveDoc(this, 'GSTR-6')">✅ Approve</button><br>
+                                <button class="btn btn-danger-outline" style="width:100%;">❌ Send Back to L3</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 6: ORDERS & NOTICES -->
+        <div id="tab-notices" class="tab-content">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Notice Ref No.</th>
+                            <th>Date of Issue</th>
+                            <th>Financial Year</th>
+                            <th>Description / Type</th>
+                            <th>Deadline</th>
+                            <th>Assigned To</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong class="sans-font">ZY270324001234</strong></td>
+                            <td class="sans-font">15-Mar-2026</td>
+                            <td>FY 2022-23</td>
+                            <td>DRC-01 (Short payment of tax)</td>
+                            <td class="sans-font text-red"><strong>15-Apr-2026</strong></td>
+                            <td>L4</td>
+                            <td><span class="status-badge badge-amber">Working</span></td>
+                            <td><button class="btn btn-outline">📄 View Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong class="sans-font">AS070524009876</strong></td>
+                            <td class="sans-font">05-May-2026</td>
+                            <td>FY 2023-24</td>
+                            <td>ASMT-10 (Scrutiny Notice)</td>
+                            <td class="sans-font">05-Jun-2026</td>
+                            <td>L4</td>
+                            <td><span class="status-badge badge-red">Pending</span></td>
+                            <td><button class="btn btn-outline">📄 View Notice</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong class="sans-font">TY330124004321</strong></td>
+                            <td class="sans-font">10-Jan-2026</td>
+                            <td>FY 2021-22</td>
+                            <td>RFD-08 (Refund Rejection)</td>
+                            <td class="sans-font text-muted">10-Feb-2026</td>
+                            <td>L4</td>
+                            <td><span class="status-badge badge-green">Filed</span></td>
+                            <td><button class="btn btn-primary">✅ View Reply</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong class="sans-font">DRC070224008765</strong></td>
+                            <td class="sans-font">20-Feb-2026</td>
+                            <td>FY 2020-21</td>
+                            <td>DRC-07 (Demand Order)</td>
+                            <td class="sans-font text-red"><strong>20-Mar-2026</strong></td>
+                            <td>L4</td>
+                            <td><span class="status-badge badge-purple">Under Appeal</span></td>
+                            <td><button class="btn btn-outline">📄 View Order</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 7: COMPLIANCE CALENDAR -->
+        <div id="tab-calendar" class="tab-content">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Filing Month</th>
+                            <th>Return Type</th>
+                            <th>Due Date</th>
+                            <th>Filing Status</th>
+                            <th>ARN / Acknowledgement</th>
+                            <th style="width: 260px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong style="color: var(--navy-main);">April 2026</strong></td>
+                            <td><strong class="sans-font">GSTR-1</strong></td>
+                            <td class="sans-font">11-May-2026</td>
+                            <td><span class="status-badge badge-green">Filed</span></td>
+                            <td class="sans-font text-muted">AA2704261234567</td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-outline" style="flex: 1;">⬇️ Ack</button>
+                                    <button class="btn btn-outline" style="flex: 1;">⬇️ Workings</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: var(--navy-main);">April 2026</strong></td>
+                            <td><strong class="sans-font">GSTR-3B</strong></td>
+                            <td class="sans-font">20-May-2026</td>
+                            <td><span class="status-badge badge-green">Filed</span></td>
+                            <td class="sans-font text-muted">AA2704269876543</td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-outline" style="flex: 1;">⬇️ Ack</button>
+                                    <button class="btn btn-outline" style="flex: 1;">⬇️ Workings</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: var(--navy-main);">May 2026</strong></td>
+                            <td><strong class="sans-font">GSTR-1</strong></td>
+                            <td class="sans-font">11-Jun-2026</td>
+                            <td><span class="status-badge badge-amber">Under Review</span></td>
+                            <td class="sans-font text-muted">-</td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-outline" style="flex: 1;">📄 View Draft</button>
+                                    <button class="btn btn-outline" style="flex: 1;">⬇️ Workings</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: var(--navy-main);">May 2026</strong></td>
+                            <td><strong class="sans-font">GSTR-3B</strong></td>
+                            <td class="sans-font">20-Jun-2026</td>
+                            <td><span class="status-badge badge-red">Pending</span></td>
+                            <td class="sans-font text-muted">-</td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-primary" style="flex: 1;">Start Filing</button>
+                                    <button class="btn btn-outline" style="flex: 1;">⬇️ Workings</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: var(--navy-main);">Annual 25-26</strong></td>
+                            <td><strong class="sans-font">GSTR-9 & 9C</strong></td>
+                            <td class="sans-font">31-Dec-2026</td>
+                            <td><span class="status-badge badge-red">Not Filed</span></td>
+                            <td class="sans-font text-muted">-</td>
+                            <td>
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="btn btn-outline" style="flex: 1;">Start Working</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 8: SEEKING ADVICE -->
+        <div id="tab-advice" class="tab-content">
+            
+            <!-- LIST VIEW (Default) -->
+            <div id="advice-list-view" style="display: flex; flex-direction: column; height: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0 0.5rem;">
+                    <h2 style="color: var(--navy-main); margin: 0; font-size: 1.4rem;">Support History & Expert Advice</h2>
+                    <button class="btn btn-primary" onclick="toggleAdviceView('form')" style="padding: 0.6rem 1.2rem;">➕ Request New Advice</button>
+                </div>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ticket ID</th>
+                                <th>Date</th>
+                                <th style="width: 40%;">Subject</th>
+                                <th>Assigned To</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="demo-ticket-row-client" style="display: none; background: var(--blue-light);">
+                                <td><strong class="sans-font">REQ-2026-999</strong></td>
+                                <td class="sans-font">Just Now</td>
+                                <td id="demo-ticket-subj-client">New Ticket</td>
+                                <td>L4 & Partner</td>
+                                <td><span id="demo-ticket-status-client" class="status-badge badge-amber">Sent to Partner</span></td>
+                                <td><button class="btn btn-outline btn-sm" onclick="viewDemoThread()">View Thread</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong class="sans-font">REQ-2026-041</strong></td>
+                                <td class="sans-font">18-Apr-2026</td>
+                                <td>Clarification on Rule 37 Reversal applicability for MSME vendors</td>
+                                <td>L4</td>
+                                <td><span class="status-badge badge-amber">Pending</span></td>
+                                <td><button class="btn btn-outline btn-sm">View Thread</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong class="sans-font">REQ-2026-023</strong></td>
+                                <td class="sans-font">02-Mar-2026</td>
+                                <td>Input Tax Credit eligibility on Employee Medical Insurance</td>
+                                <td>L4</td>
+                                <td><span class="status-badge badge-green">Solved</span></td>
+                                <td><button class="btn btn-outline btn-sm">View Thread</button></td>
+                            </tr>
+                            <tr>
+                                <td><strong class="sans-font">REQ-2025-189</strong></td>
+                                <td class="sans-font">14-Dec-2025</td>
+                                <td>GST Implications on cross-charge between distinct persons</td>
+                                <td>L4</td>
+                                <td><span class="status-badge badge-green">Solved</span></td>
+                                <td><button class="btn btn-outline btn-sm">View Thread</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FORM VIEW (Hidden by default) -->
+            <div id="advice-form-view" style="display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; position: relative;">
+                <button class="btn btn-outline" style="position: absolute; top: 0; left: 0;" onclick="toggleAdviceView('list')">⬅️ Back to History</button>
+                
+                <div class="card" style="width: 100%; max-width: 600px; padding: 1.5rem 2.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-top: 0.5rem;">
+                    <h2 style="color: var(--navy-main); margin-top: 0; margin-bottom: 0.2rem; font-size: 1.3rem;">Ask for Expert Advice</h2>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.4;">
+                        Have a complex GST query? <strong style="color: var(--navy-main);">Both your Partner and Assigned CA will be notified.</strong>
+                    </p>
+                    
+                    <div style="margin-bottom: 0.8rem; width: 100%;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.2rem; font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--navy-main);">Subject</label>
+                        <input type="text" id="demo-adv-subj" class="comment-box" style="height: 38px; font-size: 0.9rem; width: 100%;" placeholder="e.g., Clarification on Rule 37 Reversal">
+                    </div>
+                    
+                    <div style="margin-bottom: 0.8rem; width: 100%;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.2rem; font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--navy-main);">Detailed Message</label>
+                        <textarea id="demo-adv-msg" class="comment-box" style="height: 75px; font-size: 0.9rem; width: 100%;" placeholder="Describe your query in detail..."></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 1rem; width: 100%;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-family: 'Inter', sans-serif; font-size: 0.85rem; color: var(--navy-main);">Attachment (Optional)</label>
+                        <input type="file" style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-dark); padding: 5px 0;">
+                    </div>
+                    
+                    <button class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-size: 1.05rem;" onclick="sendDemoAdvice()">✉️ Send to CA & Partner</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- KPI MODAL -->
+    <div id="kpiModal" class="modal-overlay" onclick="if(event.target===this) closeKpiModal()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 id="kpiModalTitle" style="margin:0; color:var(--navy-main); font-size:1.4rem;"></h2>
+                    <p id="kpiModalNote" style="margin:5px 0 0 0; color:var(--amber-main); font-size:0.85rem; font-weight:600; display:none; background:var(--amber-light); padding:4px 8px; border-radius:4px; border:1px solid var(--amber-main);"></p>
+                </div>
+                <button class="close-btn" onclick="closeKpiModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <table class="modal-table" id="kpiModalTable">
+                    <thead id="kpiModalThead"></thead>
+                    <tbody id="kpiModalTbody"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <span id="kpiModalCount" style="color:var(--text-muted); font-size:0.9rem; font-weight:500;"></span>
+                <button class="btn btn-primary" onclick="downloadModalCSV()">⬇️ Download CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        function openTab(evt, tabId) {
+            var tabContents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabContents.length; i++) tabContents[i].classList.remove("active");
+
+            var tabLinks = document.getElementsByClassName("tab-link");
+            for (var i = 0; i < tabLinks.length; i++) tabLinks[i].classList.remove("active");
+
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            
+            setTimeout(() => {
+                Object.values(Chart.instances).forEach(chart => chart.resize());
+            }, 10);
+        }
+
+        // Toggle logic for Seeking Advice tab
+        function toggleAdviceView(viewType) {
+            if (viewType === 'form') {
+                document.getElementById('advice-list-view').style.display = 'none';
+                document.getElementById('advice-form-view').style.display = 'flex';
+            } else {
+                document.getElementById('advice-list-view').style.display = 'flex';
+                document.getElementById('advice-form-view').style.display = 'none';
+            }
+        }
+
+        // ---------------------------------------------------------
+        // KPI MODAL LOGIC & SAMPLE DATA (Fact-checked Logic)
+        // ---------------------------------------------------------
+        const kpiData = {
+            'kpi1': { title: "Missed Airlines ITC", cols: ["Airline", "GSTIN", "Invoice No", "Date", "IGST", "Status"], rows: [["IndiGo", "06AACCI1681G1ZH", "INV-IG-4521", "15-Apr-25", "₹18,000", "Missing from Books"], ["Air India", "07AAACN0046A1ZX", "AI-9034", "22-Apr-25", "₹24,500", "Missing from Books"]] },
+            'kpi2': { title: "ITC Claimed vs Available", note: "DRC-01C Risk (Auto-generated notice for excess ITC claims)", cols: ["Tax Head", "Claimed 3B", "Available 2B", "Variance", "Status"], rows: [["IGST", "₹2,10,000", "₹2,05,000", "+₹5,000", "Excess"], ["CGST", "₹85,000", "₹80,500", "+₹4,500", "Excess"], ["SGST", "₹85,000", "₹80,500", "+₹4,500", "Excess"], ["Total", "₹3,80,000", "₹3,66,000", "+₹14,000", "Critical Risk"]] },
+            'kpi3': { title: "Import ITC Claimed", cols: ["BOE Number", "Port", "Date", "Goods Desc", "IGST Paid", "IGST 3B", "Status"], rows: [["BOE-001", "Mumbai", "05-Apr-25", "Electronic Components", "₹1,50,000", "₹1,50,000", "✅ Matched"], ["BOE-002", "Chennai", "18-Apr-25", "Raw Materials", "₹1,95,000", "₹1,95,000", "✅ Matched"]] },
+            'kpi4': { title: "Pending Reclaim ITC", note: "Tracks Rule 37 & 37A reversals awaiting reclaim in Table 4(A)(5)", cols: ["Month", "Reversed (4B2)", "Reclaimed (4A5)", "Net Pending", "Action Due"], rows: [["Apr-25", "₹50,000", "₹20,000", "₹30,000", "Pay vendor → reclaim"], ["May-25", "₹0", "₹0", "₹30,000", "Carried forward"], ["Jun-25", "₹55,000", "₹0", "₹85,000", "Reclaim in next 3B"]] },
+            'kpi5': { title: "Pending IMS Actions", note: "Pending invoices do NOT enter GSTR-2B. Lapse risk under Sec 16(4) by Nov 30.", cols: ["Supplier", "Inv No", "Date", "ITC", "Deadline", "Action"], rows: [["Vendor A (29XXXXX)", "INV-A-001", "01-Apr-25", "₹12,000", "218 days", "Accept in Portal"], ["Vendor B (07YYYYY)", "INV-B-234", "05-Apr-25", "₹8,500", "218 days", "Accept in Portal"]] },
+            'kpi6': { title: "Unclaimed ITC (GSTR-2B)", note: "Excludes blocked credit flagged in Sec 17(5). Genuinely eligible working capital.", cols: ["Supplier", "Inv No", "2B ITC", "3B Claimed", "Unclaimed", "Reason"], rows: [["ABC Supplies (29AAABC1234)", "INV-001", "₹25,000", "₹0", "₹25,000", "Not booked"], ["XYZ Traders (27XYZPQ5678)", "INV-445", "₹44,900", "₹0", "₹44,900", "Not booked"]] },
+            'kpi7': { title: "GSTR-1 vs 3B Liability Gap", note: "DRC-01B Notice Trigger: GSTR-1 liability exceeds 3B tax paid.", cols: ["Section", "GSTR-1 Liability", "GSTR-3B Paid", "Gap", "Risk"], rows: [["IGST", "₹1,85,000", "₹1,85,000", "₹0", "✅"], ["CGST", "₹57,225", "₹50,000", "+₹7,225", "🔴"], ["SGST", "₹57,225", "₹50,000", "+₹7,225", "🔴"]] },
+            'kpi8': { title: "RCM Liability vs Paid", cols: ["Vendor", "Service Type", "Date", "Taxable", "RCM Applicable", "Paid in 3B", "Gap"], rows: [["Mahavir Transport", "GTA Freight", "10-Apr-25", "₹50,000", "₹4,500", "₹0", "₹4,500"], ["Anand & Co.", "Legal", "15-Apr-25", "₹40,000", "₹3,500", "₹0", "₹3,500"]] },
+            'kpi9': { title: "Rule 37 Risk (>180 Days)", note: "Interest rate (18-24%) depends on ECL utilisation. May be NIL per Rule 88B.", cols: ["Vendor", "Inv No", "Date", "ITC Month", "Days", "ITC Risk", "Int @18%", "Int @24%", "Action"], rows: [["Shree Industries", "SI-089", "15-Sep-25", "May-25", "341", "₹18,000", "₹3,022", "₹4,029", "Reverse in 3B"], ["ABC Components", "ABC-441", "01-Aug-25", "Sep-25", "218", "₹9,000", "₹968", "₹1,291", "Pay vendor"]] },
+            'kpi10': { title: "Sec 17(5) Blocked Credit", note: "SYSTEM FLAG - Advisory only. CA must confirm before reversal.", cols: ["Vendor", "Inv No", "Description", "HSN/SAC", "ITC", "Blocked Sec", "CA Decision"], rows: [["Hotel Taj", "TAJ-456", "Business Lunch", "9963", "₹7,000", "17(5)(b)(i)", "Pending"], ["Maruti Dealer", "MD-089", "Company Car", "8703", "₹5,000", "17(5)(a)", "Pending"], ["Star Health", "SHI-012", "Health Insurance", "—", "₹3,500", "17(5)(b)(iii)", "Pending"]] }
+        };
+
+        let currentKpiId = null;
+
+        function openKpiModal(kpiId) {
+            currentKpiId = kpiId;
+            const data = kpiData[kpiId];
+            if(!data) return;
+            
+            document.getElementById('kpiModalTitle').innerText = data.title;
+            const noteEl = document.getElementById('kpiModalNote');
+            if(data.note) { noteEl.innerText = '⚠️ ' + data.note; noteEl.style.display = 'inline-block'; }
+            else { noteEl.style.display = 'none'; }
+            
+            document.getElementById('kpiModalThead').innerHTML = '<tr>' + data.cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+            document.getElementById('kpiModalTbody').innerHTML = data.rows.map(r => '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('');
+            document.getElementById('kpiModalCount').innerText = `Showing ${data.rows.length} line items`;
+            
+            document.getElementById('kpiModal').style.display = 'flex';
+        }
+
+        function closeKpiModal() {
+            document.getElementById('kpiModal').style.display = 'none';
+            currentKpiId = null;
+        }
+
+        function downloadModalCSV() {
+            if(!currentKpiId) return;
+            const data = kpiData[currentKpiId];
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += data.cols.join(",") + "\n";
+            data.rows.forEach(row => {
+                let formattedRow = row.map(str => `"${str.toString().replace(/"/g, '""')}"`).join(",");
+                csvContent += formattedRow + "\n";
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Accolet_${data.title.replace(/\s+/g, '_')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function downloadDirectCSV(filename, csvString) {
+            let csvContent = "data:text/csv;charset=utf-8," + encodeURIComponent(csvString);
+            const link = document.createElement("a");
+            link.setAttribute("href", csvContent);
+            link.setAttribute("download", filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Make all cards clickable
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const titleEl = card.querySelector('.card-title');
+                if(!titleEl) return;
+                const t = titleEl.innerText.trim();
+                let mappedId = null;
+                
+                if(t.includes("Missed Airline")) mappedId = 'kpi1';
+                else if(t.includes("ITC Claimed vs Available")) mappedId = 'kpi2';
+                else if(t.includes("Import ITC Claimed")) mappedId = 'kpi3';
+                else if(t.includes("Reversed vs Reclaimed")) mappedId = 'kpi4';
+                else if(t.includes("Pending IMS Actions")) mappedId = 'kpi5';
+                else if(t.includes("Unclaimed ITC")) mappedId = 'kpi6';
+                else if(t.includes("GSTR-1 vs 3B")) mappedId = 'kpi7';
+                else if(t.includes("RCM Liability")) mappedId = 'kpi8';
+                else if(t.includes("Rule 37 Risk")) mappedId = 'kpi9';
+                else if(t.includes("Sec 17(5)")) mappedId = 'kpi10';
+
+                if(mappedId) {
+                    card.style.cursor = 'pointer';
+                    card.style.transition = 'transform 0.2s';
+                    card.title = "Click to view drill-down details";
+                    card.onclick = () => openKpiModal(mappedId);
+                    card.addEventListener('mouseover', () => card.style.transform = 'translateY(-3px)');
+                    card.addEventListener('mouseout', () => card.style.transform = 'translateY(0)');
+                }
+            });
+        });
+
+        // ---------------------------------------------------------
+        // LIVE DEMO SYNC LOGIC
+        // ---------------------------------------------------------
+        function sendDemoAdvice() {
+            let subj = document.getElementById('demo-adv-subj').value;
+            let msg = document.getElementById('demo-adv-msg').value;
+            if(!subj) return alert("Please enter subject");
+            
+            localStorage.setItem('demo_advice_ticket', JSON.stringify({subject: subj, msg: msg}));
+            localStorage.removeItem('demo_advice_replied');
+            
+            window.parent.postMessage({ type: 'SHOW_TOAST', message: `Ticket sent to Partner Dashboard!` }, '*');
+            toggleAdviceView('list');
+            document.getElementById('demo-ticket-row-client').style.display = 'table-row';
+            document.getElementById('demo-ticket-subj-client').innerText = subj;
+            document.getElementById('demo-ticket-status-client').className = 'status-badge badge-amber';
+            document.getElementById('demo-ticket-status-client').innerText = 'Sent to Partner';
+            alert("Advice Request Sent Successfully!");
+        }
+
+        function viewDemoThread() {
+            if(localStorage.getItem('demo_advice_replied')) {
+                alert("Partner's Expert Response:\n\nYes, please hold the ITC reversal until the dispute is settled. We have documented the supplier communication for audit defense and updated the notes on your GSTR-3B.");
+            } else {
+                alert("This query is currently pending Partner review. No response yet.");
+            }
+        }
+
+        setInterval(() => {
+            // Check CA Approvals
+            let g1 = localStorage.getItem('demo_doc_status_GSTR-1');
+            if(g1) {
+                let badge = document.getElementById('demo-gstr1-status');
+                badge.className = g1 === 'Approved' ? 'status-badge badge-green' : 'status-badge badge-amber';
+                badge.innerText = g1;
+            }
+            let g3 = localStorage.getItem('demo_doc_status_GSTR-3B');
+            if(g3) {
+                let badge = document.getElementById('demo-gstr3b-status');
+                badge.className = g3 === 'Approved' ? 'status-badge badge-green' : 'status-badge badge-amber';
+                badge.innerText = g3;
+            }
+
+            // Check Partner Reply
+            if(localStorage.getItem('demo_advice_replied') && localStorage.getItem('demo_advice_ticket')) {
+                document.getElementById('demo-ticket-row-client').style.display = 'table-row';
+                let st = document.getElementById('demo-ticket-status-client');
+                if(st.innerText !== 'Partner Replied!') {
+                    st.className = 'status-badge badge-green';
+                    st.innerText = 'Partner Replied!';
+                }
+            }
+        }, 1000);
+
+        function approveDoc(btn, doc) {
+            btn.parentElement.parentElement.innerHTML = `<td colspan="4" style="text-align:center; padding: 2rem; color: var(--green-main); font-weight:bold; font-size: 1.1rem; background: #ecfdf5;">✅ ${doc} Approved by Client and sent for filing.</td>`;
+            localStorage.setItem('demo_doc_status_' + doc, 'Approved');
+            if(window.parent && window.parent.postMessage) window.parent.postMessage({ type: 'SHOW_TOAST', message: `${doc} Approved!` }, '*');
+        }
+
+        // Auto-functionalize all other buttons for the demo
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('button').forEach(btn => {
+                if(!btn.getAttribute('onclick')) {
+                    btn.onclick = function() {
+                        let actionText = this.innerText.replace(/[^\x00-\x7F]/g, '').trim();
+                        if(!actionText) actionText = "Action";
+                        if(window.parent !== window && window.parent.postMessage) {
+                            window.parent.postMessage({ type: 'SHOW_TOAST', message: `Executing: ${actionText}... Done!` }, '*');
+                        } else {
+                            alert(`Demo Action: ${actionText} executed successfully!`);
+                        }
+                    };
+                }
+            });
+        });
+
+        Chart.defaults.color = '#64748b';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.font.size = 11;
+        Chart.defaults.maintainAspectRatio = false;
+
+        const ctxTax = document.getElementById('taxChart').getContext('2d');
+        new Chart(ctxTax, {
+            type: 'bar',
+            data: {
+                labels: ['Outward', 'Inward', 'RCM'],
+                datasets: [
+                    { label: 'IGST', data: [1500000, 800000, 25000], backgroundColor: '#2b74c9', borderRadius: 4 },
+                    { label: 'CGST', data: [1200000, 900000, 10000], backgroundColor: '#18a084', borderRadius: 4 },
+                    { label: 'SGST', data: [1200000, 900000, 10000], backgroundColor: '#142433', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true, 
+                scales: {
+                    x: { stacked: true, grid: { display: false } },
+                    y: { stacked: true, beginAtZero: true, border: { display: false } }
+                },
+                plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8 } } }
+            }
+        });
+
+        const ctxVendor = document.getElementById('vendorChart').getContext('2d');
+        new Chart(ctxVendor, {
+            type: 'doughnut',
+            data: {
+                labels: ['Filed', 'Not Filed'],
+                datasets: [{ data: [85, 15], backgroundColor: ['#18a084', '#e11d48'], borderWidth: 0 }]
+            },
+            options: {
+                responsive: true, cutout: '75%',
+                plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8 } } }
+            }
+        });
+
+        const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+        new Chart(ctxCategory, {
+            type: 'bar',
+            data: {
+                labels: ['IT', 'Logistics', 'Supplies', 'Raw Mat', 'Rent'],
+                datasets: [{
+                    data: [850000, 420000, 150000, 2100000, 500000],
+                    backgroundColor: ['#2b74c9', '#18a084', '#d97706', '#142433', '#8b5cf6'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true,
+                scales: {
+                    x: { display: false },
+                    y: { grid: { display: false }, border: { display: false } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+</body>
+</html>

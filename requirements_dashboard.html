@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accolet IndiaGST! - Requirements Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Accolet Theme */
+            --bg-body: #e8eff3;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #475569;
+            
+            --teal-main: #18a084;
+            --teal-light: #e6f5f2;
+            --navy-main: #142433;
+            --blue-main: #2b74c9;
+            --blue-light: #ebf3fe;
+            
+            --red-main: #e11d48;
+            --red-light: #fff0f2;
+            --amber-main: #d97706;
+            --amber-light: #fffbeb;
+            --green-main: #059669;
+            --purple-main: #8b5cf6;
+            --purple-light: #ede9fe;
+            
+            --border-soft: #cbd5e1;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sans-font {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* --- HEADER --- */
+        .fixed-header-wrapper {
+            background: var(--navy-main);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .top-bar {
+            background: linear-gradient(to right, var(--teal-main), var(--blue-main));
+            color: #ffffff;
+            padding: 6px 2rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .hero-header {
+            padding: 1rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hero-title {
+            font-size: 1.8rem;
+            margin: 0 0 8px 0;
+            letter-spacing: 0.5px;
+            font-family: 'Book Antiqua', Georgia, serif;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .ca-badge {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* --- TABS --- */
+        .tabs-container {
+            background: white;
+            padding: 0 2rem;
+            display: flex;
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        .tab-link {
+            background: none;
+            border: none;
+            padding: 0.8rem 1rem;
+            font-family: 'Book Antiqua', serif;
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .tab-link:hover { color: var(--navy-main); }
+        .tab-link.active { color: var(--teal-main); border-bottom-color: var(--teal-main); }
+
+        /* --- MAIN CONTENT CONTAINER --- */
+        .main-container {
+            padding: 1.5rem 2rem;
+            box-sizing: border-box;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { 
+            display: flex; 
+            flex-direction: column;
+            flex-shrink: 0;
+            min-height: min-content;
+            animation: fadeIn 0.3s ease-out; 
+            gap: 1.5rem;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- CARDS --- */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .card-title { font-weight: bold; font-size: 1.15rem; color: var(--navy-main); margin-bottom: 0.5rem; }
+        .card-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1rem;}
+
+        /* --- TABLES --- */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05);
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: var(--navy-main);
+            font-weight: 700;
+            text-align: left;
+            padding: 1.2rem 1rem;
+            border-bottom: 1px solid var(--border-soft);
+            font-size: 1.05rem;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        td {
+            padding: 1.2rem 1rem;
+            border-bottom: 1px solid var(--border-soft);
+            font-size: 1rem;
+            vertical-align: top;
+            background: white;
+            line-height: 1.5;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-amber { background: var(--amber-light); color: var(--amber-main); border: 1px solid var(--amber-main);}
+        .badge-red { background: var(--red-light); color: var(--red-main); border: 1px solid var(--red-main);}
+        .badge-green { background: #ecfdf5; color: var(--green-main); border: 1px solid var(--green-main);}
+        .badge-purple { background: var(--purple-light); color: var(--purple-main); border: 1px solid var(--purple-main);}
+        .badge-blue { background: var(--blue-light); color: var(--blue-main); border: 1px solid var(--blue-main);}
+        
+        ul { margin-top: 0; padding-left: 1.2rem; }
+        li { margin-bottom: 0.3rem; }
+    </style>
+</head>
+<body>
+
+    <!-- FIXED HEADER -->
+    <div class="fixed-header-wrapper">
+        <div class="top-bar">
+            <div><strong>Accolet IndiaGST!</strong> — Document Viewer</div>
+        </div>
+
+        <div class="hero-header">
+            <div>
+                <h1 class="hero-title">Platform Requirements Overview</h1>
+                <div class="header-controls">
+                    <div class="ca-badge">
+                        <span>📄</span> Document: <strong>India_GST_Complete_Requirements_v3</strong>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="kpi_dashboard.html" target="_blank" style="background: rgba(255, 255, 255, 0.15); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 0.9rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">🔗 Client Dashboard</a>
+                <a href="ca_dashboard.html" target="_blank" style="background: rgba(255, 255, 255, 0.15); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 0.9rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">🔗 CA Dashboard</a>
+                <a href="partner_dashboard.html" target="_blank" style="background: rgba(255, 255, 255, 0.15); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; border: 1px solid rgba(255, 255, 255, 0.3); font-size: 0.9rem; font-weight: bold; transition: all 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">🔗 Partner Dashboard</a>
+            </div>
+        </div>
+
+        <!-- TABS NAVIGATION -->
+        <div class="tabs-container">
+            <button class="tab-link active" onclick="openTab(event, 'tab-team')">1. Team & Plan</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-overview')">2. Overview & Scale</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-rbac')">3. Roles & RBAC</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-gstr1')">4. GSTR-1 Module</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-gstr3b')">5. GSTR-3B Module</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="main-container">
+
+        <!-- TAB 1: TEAM & PLAN -->
+        <div id="tab-team" class="tab-content active">
+            <div class="card" style="border-top: 4px solid var(--amber-main);">
+                <div class="card-title">Project Execution Team</div>
+                <div class="card-desc" style="margin-bottom: 0;">
+                    The core team responsible for delivering the India_GST platform. Workflow: Jyoti provides the logic in Excel → Mahesh codes it → Moteesh & Bharat cross-check.
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 20%">Team Member</th>
+                            <th style="width: 25%">Role</th>
+                            <th style="width: 55%">Responsibilities</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Jyoti</strong></td>
+                            <td><span class="status-badge badge-purple">Business Analyst</span></td>
+                            <td>Provides all business logic, formulas, and workflows via Excel documentation. Defines overall platform requirements.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mahesh</strong></td>
+                            <td><span class="status-badge badge-blue">Developer</span></td>
+                            <td>Writes the application code based on the logic provided by Jyoti. Integrates APIs and builds the frontend and backend.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bharat</strong></td>
+                            <td><span class="status-badge badge-amber">Tech Reviewer</span></td>
+                            <td>Cross-checks the codebase, ensures technical best practices, and performs rigorous code reviews.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Moteesh</strong></td>
+                            <td><span class="status-badge badge-green">CA / GST Consultant</span></td>
+                            <td>Cross-checks the GST compliance, validates the tax calculation logic, and ensures regulatory accuracy across modules.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2 style="color: var(--navy-main); margin-bottom: 1rem; margin-top: 1.5rem; font-size: 1.4rem; border-bottom: 2px solid var(--teal-main); padding-bottom: 0.5rem;">Development Milestones (Phased Roadmap)</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 20%">Phase</th>
+                            <th style="width: 45%">Module / Focus Area</th>
+                            <th style="width: 15%">Duration</th>
+                            <th style="width: 20%">Target Deadline</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Phase 1: Client MVP</strong></td>
+                            <td>Section 2 — User Roles & RBAC Architecture</td>
+                            <td>7 Days</td>
+                            <td><span class="status-badge badge-red">02 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 2: Core Compliance</strong></td>
+                            <td>Section 3 & 4 — GSTR-1 & GSTR-3B Modules</td>
+                            <td>28 Days</td>
+                            <td><span class="status-badge badge-red">30 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 3: Reconciliation</strong></td>
+                            <td>GSTR-2B vs PR Matching, Vendor ITC Tracking, IMS Automation</td>
+                            <td>14 Days</td>
+                            <td><span class="status-badge badge-amber">13 Jun 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 4: Litigation Mgmt</strong></td>
+                            <td>GSTR-9 & 9C (Annual Returns), Notice & Assessment Workflows</td>
+                            <td>17 Days</td>
+                            <td><span class="status-badge badge-amber">30 Jun 2026</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: PLATFORM OVERVIEW -->
+        <div id="tab-overview" class="tab-content">
+            <div class="card" style="border-top: 4px solid var(--blue-main);">
+                <div class="card-title">SECTION 1 — PLATFORM OVERVIEW & SCALE</div>
+                <div class="card-desc">
+                    India_GST is a multi-client, cloud-based GST compliance platform designed for chartered accountants, tax professionals, and finance teams managing 200+ GSTINs from a single workspace. Every architecture decision in this document is driven by the business requirements below.
+                </div>
+            </div>
+
+            <h2 style="color: var(--navy-main); margin-bottom: 1rem; margin-top: 0; font-size: 1.4rem; border-bottom: 2px solid var(--blue-main); padding-bottom: 0.5rem;">Core Platform Capabilities</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 25%">Capability</th>
+                            <th style="width: 50%">Description</th>
+                            <th style="width: 25%">Scale / Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Data Ingestion</strong></td>
+                            <td>Upload and process large Excel datasets — Sales Register, Purchase Register, GSTR-2B downloads.</td>
+                            <td>Up to 10 lakh rows (1,000,000 rows) per GSTIN per period.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GST Returns Covered</strong></td>
+                            <td>GSTR-1, GSTR-3B, GSTR-6 (ISD), GSTR-9, GSTR-9C, GSTR-7, IFF (QRMP).</td>
+                            <td>Comprehensive compliance coverage.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Reconciliation</strong></td>
+                            <td>GSTR-2B vs ITC Register, GSTR-1 vs GSTR-3B vs Books, GSTR-9 & 9C mapping.</td>
+                            <td>Multi-way automated matching.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Report Generation</strong></td>
+                            <td>Automated reconciliation reports — ITC matching, liability calculation, HSN analysis.</td>
+                            <td>Exportable to Excel/PDF.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PDF Extraction</strong></td>
+                            <td>Extract data from scanned PDF invoices, GSTR-3B drafts via OCR.</td>
+                            <td>Smart document processing.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Analytics Dashboards</strong></td>
+                            <td>Charts and trends per GSTIN and PAN-level consolidated view.</td>
+                            <td>Enterprise-wide visibility.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Multi-Client Portal</strong></td>
+                            <td>200+ GSTINs managed from a single platform.</td>
+                            <td>Scalable client management.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Role-Based Access</strong></td>
+                            <td>L0 Super Admin → L1 Admin → L2 CA → L3 → L4 → C1 Client.</td>
+                            <td>Strict hierarchical data isolation.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Secure Document Store</strong></td>
+                            <td>Excel files, PDFs, filed copies, working files — all versioned.</td>
+                            <td>Centralized compliance repository.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AI-Assisted GST Analysis</strong></td>
+                            <td>ITC classification, anomaly detection, GSTR-9 mapping (Phase 2/3).</td>
+                            <td>Predictive risk management.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: USER ROLES & RBAC -->
+        <div id="tab-rbac" class="tab-content">
+            <div class="card" style="border-top: 4px solid var(--navy-main);">
+                <div class="card-title">SECTION 2 — USER ROLES & RBAC ARCHITECTURE</div>
+                <div class="card-desc">
+                    Every user in India_GST has exactly one role. Roles are enforced at the API layer. <strong>Implementation Phase: 7 Days (Ends 02 May 2026).</strong>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">Role Level</th>
+                            <th style="width: 65%">Responsibilities & Access Scope</th>
+                            <th style="width: 20%">Deadline</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>L0 Super Admin</strong></td>
+                            <td>Developer Team senior partners at Accolet. Full system + dev control. Can do everything.</td>
+                            <td><span class="status-badge badge-red">26 Apr 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>L1 Admin</strong></td>
+                            <td>Admin-level access without dev tools. Full org visibility across all CAs and clients.</td>
+                            <td><span class="status-badge badge-red">28 Apr 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>L2 CA</strong></td>
+                            <td>Full access to own assigned clients. Review and approve returns.</td>
+                            <td><span class="status-badge badge-red">30 Apr 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>L3</strong></td>
+                            <td>Handles only CA-assigned clients. Prepare returns, upload invoices, save drafts.</td>
+                            <td><span class="status-badge badge-red">01 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>L4</strong></td>
+                            <td>Handles only explicitly assigned low-complexity clients. Prepare draft returns.</td>
+                            <td><span class="status-badge badge-red">02 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>C1 Client</strong></td>
+                            <td>External client login. Views only their own GSTIN's returns, approves or raises queries.</td>
+                            <td><span class="status-badge badge-red">03 May 2026</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card" style="border-top: 4px solid var(--blue-main);">
+                <div class="card-title">User Management Business Rules</div>
+                <div class="card-desc">
+                    <ul>
+                        <li>Users are never permanently deleted — only deactivated. Hard delete is not permitted.</li>
+                        <li>Every client user is linked to exactly one company GSTIN at creation time.</li>
+                        <li>Auto-generated passwords: 12-character strong password shown once in popup; never stored in plaintext.</li>
+                        <li>Only Super Admin can add, edit, deactivate users, and reset passwords.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: GSTR-1 MODULE -->
+        <div id="tab-gstr1" class="tab-content">
+            <div class="card" style="border-top: 4px solid var(--teal-main);">
+                <div class="card-title">SECTION 3 — MODULE 1: GSTR-1 OUTWARD SUPPLIES RETURN</div>
+                <div class="card-desc">
+                    GSTR-1 is filed monthly/quarterly by all GST-registered businesses. <strong>Implementation Phase: 14 Days (Ends 16 May 2026).</strong>
+                </div>
+            </div>
+
+            <h2 style="color: var(--navy-main); margin-bottom: 1rem; margin-top: 0; font-size: 1.4rem; border-bottom: 2px solid var(--teal-main); padding-bottom: 0.5rem;">GSTR-1 Feature Requirements</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 25%">Feature / Capability</th>
+                            <th style="width: 8%">Priority</th>
+                            <th style="width: 42%">Business Logic / Rationale</th>
+                            <th style="width: 15%">Notes</th>
+                            <th style="width: 10%">Deadline</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Auto-generation of GSTR-1 from e-invoice data</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Automatically fetch IRN data from the e-Invoice IRP portal and populate Tables 4, 6, 9. Exclude exempt entities (SEZ, NBFC) from auto-reco logic.</td>
+                            <td>E invoice reco not required for certain units</td>
+                            <td><span class="status-badge badge-red">05 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Master GSTIN details sheet like SEZ or REG Last year turnover</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Validate against GSTN public API to ensure GSTIN is active, check the registration type, and cross-check previous year turnover for HSN/E-invoice applicability rules.</td>
+                            <td>Core filing function</td>
+                            <td><span class="status-badge badge-red">05 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Excel / CSV bulk invoice import with column mapping</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Use dynamic header mapping to convert heterogeneous client ERP exports into the standard GST portal JSON schema, reducing manual data entry errors.</td>
+                            <td>Primary data entry method</td>
+                            <td><span class="status-badge badge-red">05 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>JSON import from GST portal</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Reverse-engineer the government JSON schema into the standard internal database format to allow round-tripping and comparison with ERP data.</td>
+                            <td>Portal data round-trip</td>
+                            <td><span class="status-badge badge-red">05 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Direct API pull from GSTN via GSP</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Establish a secure Oauth session via GSP to fetch real-time filed data, ensuring the platform data perfectly mirrors the government ledger.</td>
+                            <td>Automated data fetch</td>
+                            <td><span class="status-badge badge-red">05 May 2026</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>B2B / B2C / CDNR / Export sections — all 13 tables</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Apply validation rules specific to each section (e.g., POS checks for inter-state, shipping bill validation for exports, original invoice linking for CDNR).</td>
+                            <td>Full form coverage</td>
+                            <td><span class="status-badge badge-red">08 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>HSN-wise summary — Table 12</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Aggregate invoice line items by HSN code. Enforce 6-digit HSN for > Rs 5 Cr turnover and 4-digit for <= Rs 5 Cr turnover as per CGST rules.</td>
+                            <td>Mandatory for turnover > Rs.5 Cr</td>
+                            <td><span class="status-badge badge-red">08 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nil-rated / Exempted / Non-GST supplies — Table 8</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Categorize non-taxable supplies accurately to prevent them from inflating taxable turnover, while ensuring they are reported for ITC reversal calculations (Rule 42).</td>
+                            <td>Complete liability coverage</td>
+                            <td><span class="status-badge badge-red">08 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Amendments — B2BA, CDNRA, etc.</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Link amendment entries to the original financial year and invoice number. Ensure tax differences (upward/downward) are accurately tracked for liability adjustment.</td>
+                            <td>Correction workflow</td>
+                            <td><span class="status-badge badge-red">08 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Error validation before portal upload</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Run a local rules engine that mirrors the GST portal's pre-flight checks (e.g., invalid GSTIN format, tax amount mismatch) to ensure a 100% success rate on upload.</td>
+                            <td>Pre-flight checks</td>
+                            <td><span class="status-badge badge-red">08 May 2026</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>JSON file generation for portal upload</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Construct a nested JSON payload strictly adhering to the latest GSTN API specification, handling pagination and size limits for large datasets.</td>
+                            <td>Portal submission</td>
+                            <td><span class="status-badge badge-red">12 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>IMS Outward data pull & status actions</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Pull Invoice Management System (IMS) data to track buyer actions (Accept/Reject/Pending) in real-time, allowing proactive dispute resolution before the 14th.</td>
+                            <td>Oct 2024 IMS system</td>
+                            <td><span class="status-badge badge-red">12 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>QRMP scheme / IFF support for quarterly filers</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Enable Invoice Furnishing Facility (IFF) for the first two months of the quarter, restricting uploads to B2B and CDNR, capped at Rs 50 Lakhs per month.</td>
+                            <td>QRMP compliance</td>
+                            <td><span class="status-badge badge-red">12 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>SEZ supply handling — zero-rated</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Differentiate between "With Payment of Tax" and "Without Payment of Tax" (LUT). Enforce mandatory LUT number validation for without-payment exports.</td>
+                            <td>Export compliance</td>
+                            <td><span class="status-badge badge-red">12 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>PAN-level multi-GSTIN filing dashboard</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Aggregate statuses across all state-level GSTINs under a single PAN to give the management a consolidated compliance risk view.</td>
+                            <td>Multi-entity management</td>
+                            <td><span class="status-badge badge-red">12 May 2026</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>Export to Excel post-filing — full year in 1 click</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Consolidate data from 12 monthly periods into a single, pivot-ready Excel workbook for annual audit and GSTR-9 preparation.</td>
+                            <td>Post-filing downloads</td>
+                            <td><span class="status-badge badge-red">16 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>GSTR-1A amendment support</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Enable post-filing corrections before GSTR-3B is filed, adjusting the liability dynamically for the current month.</td>
+                            <td>Regulatory compliance</td>
+                            <td><span class="status-badge badge-red">16 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tally / Busy / SAP / ZOHO direct integration</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Connect directly to the ERP database or API to bypass manual Excel exports, creating a single source of truth and eliminating data tampering risks.</td>
+                            <td>Most common Indian ERP connection</td>
+                            <td><span class="status-badge badge-red">16 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>PDF/print generation of GSTR-1 summary</strong></td>
+                            <td><span class="status-badge badge-amber">P2</span></td>
+                            <td>Generate a visually distinct, client-ready PDF that summarises tax heads and liabilities, serving as a formal management sign-off document.</td>
+                            <td>Client deliverable</td>
+                            <td><span class="status-badge badge-red">16 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>GL vs GSTR-1 reconciliation (Books reconciliation)</strong></td>
+                            <td><span class="status-badge badge-amber">P2</span></td>
+                            <td>Compare General Ledger revenue accounts against GSTR-1 outward taxable supplies to identify unbilled revenue or unrecorded sales.</td>
+                            <td>Enterprise audit feature</td>
+                            <td><span class="status-badge badge-red">16 May 2026</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h2 style="color: var(--navy-main); margin-bottom: 1rem; margin-top: 1.5rem; font-size: 1.4rem; border-bottom: 2px solid var(--teal-main); padding-bottom: 0.5rem;">Data Tables Supported</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 25%">Table Number</th>
+                            <th style="width: 75%">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Table 4</strong></td><td>B2B Supplies — Invoice-level, Taxable</td></tr>
+                        <tr><td><strong>Table 5</strong></td><td>B2C Large Invoices (> Rs.1 Lakh, inter-state)</td></tr>
+                        <tr><td><strong>Table 6</strong></td><td>Zero-rated Supplies & Deemed Exports</td></tr>
+                        <tr><td><strong>Table 7</strong></td><td>B2C Small Supplies (Net of Debit/Credit Notes)</td></tr>
+                        <tr><td><strong>Table 8</strong></td><td>Nil-rated, Exempted & Non-GST Outward Supplies</td></tr>
+                        <tr><td><strong>Table 9 / 9B / 9C</strong></td><td>Amendments to B2B, CDNR in previous periods</td></tr>
+                        <tr><td><strong>Table 10</strong></td><td>B2C (Others) Amendments</td></tr>
+                        <tr><td><strong>Table 11</strong></td><td>Advances Received / Adjusted</td></tr>
+                        <tr><td><strong>Table 12</strong></td><td>HSN-wise Summary of Outward Supplies</td></tr>
+                        <tr><td><strong>Table 13</strong></td><td>Documents Issued — Invoice series tracking</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 5: GSTR-3B MODULE -->
+        <div id="tab-gstr3b" class="tab-content">
+            <div class="card" style="border-top: 4px solid var(--purple-main);">
+                <div class="card-title">SECTION 4 — MODULE 2: GSTR-3B MONTHLY SUMMARY RETURN</div>
+                <div class="card-desc">
+                    GSTR-3B captures outward liability, ITC claims, and net tax payable. <strong>Implementation Phase: 14 Days (Ends 30 May 2026).</strong>
+                </div>
+            </div>
+
+            <h2 style="color: var(--navy-main); margin-bottom: 1rem; margin-top: 0; font-size: 1.4rem; border-bottom: 2px solid var(--purple-main); padding-bottom: 0.5rem;">GSTR-3B Feature Requirements</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 25%">Feature / Capability</th>
+                            <th style="width: 8%">Priority</th>
+                            <th style="width: 42%">Business Logic / Rationale</th>
+                            <th style="width: 15%">Notes</th>
+                            <th style="width: 10%">Deadline</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Auto-populate from GSTR-1 data (Table 3.1 hard-lock)</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Automatically pull liability figures from the filed GSTR-1 to prevent manual overrides, enforcing the new GSTN mandate for Table 3.1.</td>
+                            <td>Oct 2024 regulatory change</td>
+                            <td><span class="status-badge badge-red">20 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>IMS inward actions: Accept / Reject / Pending per invoice</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Process vendor invoices via IMS. "Accept" flows to 2B; "Reject" blocks ITC; "Pending" defers ITC to the next month, optimising working capital.</td>
+                            <td>IMS compliance downloadable in Excel</td>
+                            <td><span class="status-badge badge-red">20 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>AI-driven 2B vs Purchase Register reconciliation</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Use multi-pass fuzzy matching (exact, tolerance-based, pattern-based) to identify valid ITC claims even when vendor invoice numbers have typos.</td>
+                            <td>Multi-pass matching algorithm</td>
+                            <td><span class="status-badge badge-red">20 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ITC bucketing: Matched / Mismatched / Missing / Duplicate</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Classify ITC into actionable buckets. Focus CA attention purely on "Mismatched" and "Missing in 2B" to recover lost credits.</td>
+                            <td>Reconciliation result display</td>
+                            <td><span class="status-badge badge-red">20 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>GSTR-2B fetch & ITC auto-fill into Table 4</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Fetch static 2B data on the 14th. Extract eligible ITC and auto-populate Table 4A(5), restricting ITC claims to strictly what is available in 2B.</td>
+                            <td>Core ITC automation</td>
+                            <td><span class="status-badge badge-red">20 May 2026</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>RCM liability calculation — Reverse Charge Mechanism</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Identify specific inward supplies (GTA, Legal) and auto-calculate RCM liability. Ensure it is simultaneously claimed as ITC in the same month.</td>
+                            <td>Mandatory field (RCM Template)</td>
+                            <td><span class="status-badge badge-red">25 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Offset liability calculator: IGST → CGST → SGST sequence</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Implement Section 49 rules mathematically: Exhaust IGST credit first against IGST liability, then CGST, then SGST, ensuring zero cash outflow.</td>
+                            <td>Tax payment sequencing</td>
+                            <td><span class="status-badge badge-red">25 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tax payment challan generation (PMT-06)</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Calculate Net Cash Required (Total Liability - Offsetable ITC) and generate a PMT-06 challan payload for the exact deficit amount.</td>
+                            <td>Payment integration</td>
+                            <td><span class="status-badge badge-red">25 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>DSC / EVC e-sign filing support</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Integrate with NSDL/Emudhra APIs for digital signing, ensuring cryptographic non-repudiation of the filed return.</td>
+                            <td>Digital signature</td>
+                            <td><span class="status-badge badge-red">25 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cash & credit ledger fetch from GSTN before filing</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Perform a real-time API check of PMT-09 ledgers immediately before offset to prevent filing failures due to insufficient balances.</td>
+                            <td>Balance verification</td>
+                            <td><span class="status-badge badge-red">25 May 2026</span></td>
+                        </tr>
+                        
+                        <tr>
+                            <td><strong>GSTR-3B vs GSTR-1 comparison report</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Reconcile Table 3.1 of GSTR-3B with total liability declared in GSTR-1. Flag any negative or positive variances to prevent DRC-01 notices.</td>
+                            <td>Liability validation</td>
+                            <td><span class="status-badge badge-red">30 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>GSTR-3B vs GSTR-2A comparison report</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Perform a historical ITC comparison to track delayed vendor uploads and identify potential rule 37/37A reversal requirements.</td>
+                            <td>ITC validation</td>
+                            <td><span class="status-badge badge-red">30 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Real-time tax liability calculator</strong></td>
+                            <td><span class="status-badge badge-red">P1</span></td>
+                            <td>Re-calculate the offset matrix instantly on the frontend whenever a user modifies an eligible ITC field, providing instant cash-flow visibility.</td>
+                            <td>UX requirement</td>
+                            <td><span class="status-badge badge-red">30 May 2026</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>One-click email alerts to suppliers for mismatches</strong></td>
+                            <td><span class="status-badge badge-amber">P2</span></td>
+                            <td>Auto-generate professional email templates containing exactly which invoices the vendor failed to upload, accelerating ITC recovery.</td>
+                            <td>Vendor communication</td>
+                            <td><span class="status-badge badge-red">30 May 2026</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card" style="border-top: 4px solid var(--amber-main);">
+                <div class="card-title">Reconciliation Engine — Technical Requirements</div>
+                <div class="card-desc">
+                    <ul>
+                        <li>Fetch Purchase Register (PR) from ERP or Excel upload.</li>
+                        <li>Fetch CURRENT GSTR-2B from GSTN via direct API pull (GSP integration).</li>
+                        <li>Multi-pass matching algorithm: Exact match → Tolerance match (configurable %) → Pattern-based invoice number match.</li>
+                        <li>Result buckets: Matched / Mismatched (value difference) (Date Difference) (Pan Matching GSTIN Mismatching) / Missing in 2B / Missing in PR / Duplicate.</li>
+                        <li>Auto-fill Table 4 of GSTR-3B from reconciled eligible ITC.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-link");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).style.display = "flex";
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+    </script>
+</body>
+</html>

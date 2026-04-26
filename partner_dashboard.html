@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accolet IndiaGST! - Partner Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #e8eff3;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #475569;
+            --teal-main: #18a084;
+            --navy-main: #142433;
+            --blue-main: #2b74c9;
+            --red-main: #e11d48;
+            --amber-main: #d97706;
+            --green-main: #059669;
+            --purple-main: #8b5cf6;
+            --border-soft: #cbd5e1;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-body); color: var(--text-dark);
+            font-family: 'Book Antiqua', Georgia, serif; -webkit-font-smoothing: antialiased;
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+        }
+        .sans-font { font-family: 'Inter', sans-serif; }
+
+        /* HEADER */
+        .fixed-header-wrapper { background: var(--navy-main); flex-shrink: 0; border-bottom: 3px solid var(--purple-main); }
+        .top-bar {
+            background: linear-gradient(to right, var(--navy-main), #0f172a);
+            color: #ffffff; padding: 6px 2rem; display: flex; justify-content: space-between;
+            font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600;
+        }
+        .hero-header { padding: 1rem 2rem; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .hero-title { font-size: 1.8rem; margin: 0 0 8px 0; color: #f8fafc; }
+        .header-controls { display: flex; gap: 12px; align-items: center; }
+        
+        .filter-select {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white; padding: 6px 10px; border-radius: 4px; font-family: 'Inter', sans-serif;
+            font-size: 0.85rem; outline: none; cursor: pointer;
+        }
+        .filter-select option { color: var(--text-dark); background: white; }
+
+        .client-badge { background: rgba(139, 92, 246, 0.2); padding: 0.8rem 1.2rem; border-radius: 6px; border: 1px solid rgba(139, 92, 246, 0.5); }
+
+        /* TABS */
+        .tabs-container { background: white; padding: 0 2rem; display: flex; border-bottom: 1px solid var(--border-soft); }
+        .tab-link {
+            background: none; border: none; padding: 0.8rem 1rem; font-family: 'Book Antiqua', serif;
+            font-weight: bold; font-size: 1.05rem; color: var(--text-muted); cursor: pointer;
+            border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap;
+        }
+        .tab-link:hover { color: var(--purple-main); }
+        .tab-link.active { color: var(--purple-main); border-bottom-color: var(--purple-main); }
+
+        /* MAIN CONTENT */
+        .main-container { padding: 1rem 2rem; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; flex-grow: 1; height: 100%; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* CARDS & TABLES */
+        .card { background: var(--card-bg); border-radius: 8px; padding: 1.2rem; border: 1px solid rgba(0,0,0,0.05); }
+        .table-container {
+            background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05); overflow-y: auto; height: 100%;
+        }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; font-family: 'Inter', sans-serif; }
+        th { background: #f1f5f9; color: var(--navy-main); font-weight: 600; text-align: left; padding: 1rem; border-bottom: 1px solid var(--border-soft); font-size: 0.85rem; position: sticky; top: 0; z-index: 10; }
+        td { padding: 1rem; border-bottom: 1px solid var(--border-soft); font-size: 0.9rem; vertical-align: middle; background: white; }
+        
+        .btn {
+            font-family: 'Inter', sans-serif; padding: 0.6rem 1rem; border-radius: 6px; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; border: none; transition: 0.2s; white-space: nowrap;
+        }
+        .btn-sm { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
+        .btn-primary { background: var(--blue-main); color: white; }
+        .btn-purple { background: var(--purple-main); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border-soft); color: var(--text-dark); }
+        .btn-danger-outline { background: white; border: 1px solid var(--red-main); color: var(--red-main); }
+        .btn-success { background: var(--green-main); color: white; }
+
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .badge-amber { background: var(--amber-light); color: var(--amber-main); border: 1px solid var(--amber-main);}
+        .badge-red { background: var(--red-light); color: var(--red-main); border: 1px solid var(--red-main);}
+        .badge-green { background: #ecfdf5; color: var(--green-main); border: 1px solid var(--green-main);}
+        .badge-purple { background: #f3e8ff; color: #7e22ce; border: 1px solid #7e22ce;}
+        
+        .workspace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div class="fixed-header-wrapper">
+        <div class="top-bar">
+            <div><strong>Accolet IndiaGST!</strong> — Executive Partner Portal</div>
+            <div>partner@accolet.com &nbsp;|&nbsp; Logout</div>
+        </div>
+
+        <div class="hero-header">
+            <div>
+                <h1 class="hero-title">Partner Command Center</h1>
+                <div class="header-controls">
+                    <select class="filter-select" style="font-weight: bold; background: white; color: var(--navy-main);">
+                        <option>View: All Firm Clients</option>
+                        <option>Epson Limited</option>
+                        <option>Acme Corp</option>
+                    </select>
+                    <select class="filter-select">
+                        <option>May 2026</option>
+                        <option>April 2026</option>
+                    </select>
+                </div>
+            </div>
+            <div class="client-badge">
+                <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); font-family: 'Inter', sans-serif; text-transform: uppercase;">Logged In As</div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: white;">L2 CA</div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <button class="tab-link active" onclick="openTab(event, 'tab-portfolio')">1. Firm Portfolio</button>
+            
+            <button class="tab-link" onclick="openTab(event, 'tab-advice')">2. Client Advice Hub</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-notices')">3. Notice Assignment</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+
+        <!-- TAB 1: FIRM PORTFOLIO -->
+        <div id="tab-portfolio" class="tab-content active">
+            <div class="workspace-header">
+                <h2 style="margin: 0; color: var(--navy-main);">Overall Client Health Tracker</h2>
+                <div style="display: flex; gap: 8px;">
+                    <span class="status-badge badge-red">2 High Risk Clients</span>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Assigned CA</th>
+                            <th>Returns Status (Month)</th>
+                            <th>Critical AI Flags</th>
+                            <th>Open Notices</th>
+                            <th>Overall Health</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong style="color: var(--navy-main); font-family: 'Book Antiqua', serif; font-size:1.1rem;">Epson Limited</strong></td>
+                            <td class="sans-font">L4</td>
+                            <td><span class="status-badge badge-amber">GSTR-1 Drafting</span></td>
+                            <td class="sans-font text-red"><strong>₹ 34K Rule 37 Risk</strong></td>
+                            <td class="sans-font">2</td>
+                            <td><span class="status-badge badge-red">Needs Attention</span></td>
+                            <td><button class="btn btn-outline btn-sm">Deep Dive</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: var(--navy-main); font-family: 'Book Antiqua', serif; font-size:1.1rem;">Acme Corp</strong></td>
+                            <td class="sans-font">L4</td>
+                            <td><span class="status-badge badge-green">All Filed</span></td>
+                            <td class="sans-font text-muted">0</td>
+                            <td class="sans-font">0</td>
+                            <td><span class="status-badge badge-green">Healthy</span></td>
+                            <td><button class="btn btn-outline btn-sm">Deep Dive</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong style="color: var(--navy-main); font-family: 'Book Antiqua', serif; font-size:1.1rem;">TechNova Solutions</strong></td>
+                            <td class="sans-font">L4</td>
+                            <td><span class="status-badge badge-amber">GSTR-3B Pending Review</span></td>
+                            <td class="sans-font text-amber">Sec 17(5) Flag</td>
+                            <td class="sans-font">1</td>
+                            <td><span class="status-badge badge-amber">Monitor</span></td>
+                            <td><button class="btn btn-outline btn-sm">Deep Dive</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: CLIENT ADVICE HUB -->
+        <div id="tab-advice" class="tab-content">
+            <div class="workspace-header">
+                <h2 style="margin: 0; color: var(--navy-main);">Priority Client Consultations</h2>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; height: 100%;">
+                <div class="table-container" style="flex: 1;">
+                    <table>
+                        <thead><tr><th>Ticket / Client</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <tr style="background: var(--blue-light); cursor: pointer;">
+                                <td>
+                                    <strong class="sans-font">REQ-041</strong><br>
+                                    Epson Limited
+                                </td>
+                                <td><span class="status-badge badge-amber">Awaiting Reply</span></td>
+                            </tr>
+                            <tr style="cursor: pointer;">
+                                <td>
+                                    <strong class="sans-font">REQ-039</strong><br>
+                                    Acme Corp
+                                </td>
+                                <td><span class="status-badge badge-green">Closed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card" style="flex: 2; padding: 1.2rem;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-soft); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+                        <div>
+                            <h3 id="demo-ticket-subject" style="margin: 0; color: var(--navy-main); font-size: 1.1rem;">Clarification on Rule 37 Reversal</h3>
+                            <div class="sans-font text-muted" style="font-size: 0.8rem; margin-top: 5px;">From: CFO, Epson Limited | Assigned CA: L4</div>
+                        </div>
+                        <span class="status-badge badge-amber" style="height: fit-content;">Priority</span>
+                    </div>
+                    <div id="demo-ticket-body" class="sans-font" style="font-size: 0.9rem; line-height: 1.4; margin-bottom: 0.8rem; background: #f8fafc; padding: 0.8rem; border-radius: 6px;">
+                        <strong>Client Query:</strong><br>
+                        "Hi L4 CA, our AI scan flagged ₹34,200 under Rule 37 for MSME vendors. Some of these are in dispute due to quality issues. Do we still need to reverse the ITC immediately, or can we hold it until the dispute is settled?"
+                    </div>
+                    
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.3rem; font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--navy-main);">Partner's Expert Response</label>
+                    <textarea style="width: 100%; border: 1px solid var(--border-soft); border-radius: 4px; padding: 0.8rem; font-family: 'Inter', sans-serif; font-size: 0.9rem; height: 80px; resize: none; margin-bottom: 0.8rem; box-sizing: border-box;" placeholder="Type your legal/tax opinion here..."></textarea>
+                    
+                    <button class="btn btn-purple" style="float: right;" onclick="sendPartnerReply()">📤 Send Reply to Client</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: NOTICE ASSIGNMENT -->
+        <div id="tab-notices" class="tab-content">
+            <div class="workspace-header">
+                <h2 style="margin: 0; color: var(--navy-main);">Litigation & Notice Triage</h2>
+                <button class="btn btn-outline">➕ Log New Notice manually</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Notice Ref</th><th>Client</th><th>Type</th><th>Deadline</th><th>Assign To CA</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="sans-font">AS070524009876</td>
+                            <td>Epson Limited</td>
+                            <td>ASMT-10 (Scrutiny)</td>
+                            <td class="sans-font text-red"><strong>05-Jun-2026</strong></td>
+                            <td>
+                                <select class="filter-select" style="background: white; color: var(--text-dark); border-color: var(--border-soft);">
+                                    <option>L4</option>
+                                    <option>L4</option>
+                                    <option>L4</option>
+                                </select>
+                            </td>
+                            <td><button class="btn btn-primary btn-sm">Assign</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function openTab(evt, tabId) {
+            var tabContents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabContents.length; i++) tabContents[i].classList.remove("active");
+            var tabLinks = document.getElementsByClassName("tab-link");
+            for (var i = 0; i < tabLinks.length; i++) tabLinks[i].classList.remove("active");
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // Demo Sync Logic
+        setInterval(() => {
+            let ticket = localStorage.getItem('demo_advice_ticket');
+            let replied = localStorage.getItem('demo_advice_replied');
+            if (ticket && !replied) {
+                let parsed = JSON.parse(ticket);
+                document.getElementById('demo-ticket-subject').innerText = parsed.subject;
+                document.getElementById('demo-ticket-body').innerHTML = `<strong>Client Query:</strong><br>"${parsed.msg}"`;
+            }
+        }, 1000);
+
+        function sendPartnerReply() {
+            localStorage.setItem('demo_advice_replied', 'true');
+            window.parent.postMessage({ type: 'SHOW_TOAST', message: `Expert Reply sent to Client Dashboard!` }, '*');
+            alert("Reply successfully sent to Client!");
+        }
+
+        // Auto-functionalize all other buttons for the demo
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('button').forEach(btn => {
+                if(!btn.getAttribute('onclick')) {
+                    btn.onclick = function() {
+                        let actionText = this.innerText.replace(/[^\x00-\x7F]/g, '').trim();
+                        if(!actionText) actionText = "Action";
+                        if(window.parent !== window && window.parent.postMessage) {
+                            window.parent.postMessage({ type: 'SHOW_TOAST', message: `Executing: ${actionText}... Done!` }, '*');
+                        } else {
+                            alert(`Demo Action: ${actionText} executed successfully!`);
+                        }
+                    };
+                }
+            });
+        });
+    </script>
+</body>
+</html>

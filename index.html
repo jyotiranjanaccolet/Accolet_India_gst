@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accolet IndiaGST! - Live Interactive Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #0f172a; }
+        
+        #demo-toolbar {
+            background: #1e293b; color: white; padding: 12px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid #3b82f6; flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 50;
+        }
+        
+        .demo-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px;}
+        .demo-title span { background: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .role-switch { display: flex; gap: 8px; background: #0f172a; padding: 6px; border-radius: 8px; border: 1px solid #334155; }
+        .role-btn {
+            background: transparent; color: #94a3b8; border: none; padding: 8px 16px;
+            border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+        }
+        .role-btn:hover { color: white; background: rgba(255,255,255,0.05); }
+        .role-btn.active { background: #3b82f6; color: white; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4); }
+        
+        .demo-actions button {
+            background: #ef4444; color: white; border: none; padding: 8px 16px;
+            border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+        }
+        .demo-actions button:hover { background: #dc2626; }
+        
+        #app-frame {
+            flex-grow: 1; border: none; width: 100%; height: 100%; background: #e8eff3;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification {
+            position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white;
+            padding: 12px 20px; border-radius: 8px; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000; display: flex; align-items: center; gap: 10px;
+        }
+        .notification.show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <!-- TOOLBAR -->
+    <div id="demo-toolbar">
+        <div class="demo-title">Accolet Live Demo <span>Interactive Mode</span></div>
+        
+        <div class="role-switch">
+            <button class="role-btn" id="btn-req" onclick="switchRole('requirements_dashboard.html', 'btn-req')">
+                📋 Project Plan
+            </button>
+            <button class="role-btn active" id="btn-ca" onclick="switchRole('ca_dashboard.html', 'btn-ca')">
+                👨‍💻 1. CA Workspace
+            </button>
+            <button class="role-btn" id="btn-client" onclick="switchRole('kpi_dashboard.html', 'btn-client')">
+                🏢 2. Client Dashboard
+            </button>
+            <button class="role-btn" id="btn-partner" onclick="switchRole('partner_dashboard.html', 'btn-partner')">
+                👨‍💼 3. Partner Console
+            </button>
+        </div>
+        
+        <div class="demo-actions">
+            <button onclick="resetDemo()">Reset Demo State</button>
+        </div>
+    </div>
+
+    <!-- IFRAME CONTENT -->
+    <iframe id="app-frame" src="ca_dashboard.html"></iframe>
+
+    <!-- NOTIFICATION -->
+    <div id="toast" class="notification">✅ State Synced Across Dashboards</div>
+
+    <script>
+        // Cross-iframe communication to show notifications in the parent
+        window.addEventListener('message', function(e) {
+            if(e.data && e.data.type === 'SHOW_TOAST') {
+                showToast(e.data.message);
+            }
+        });
+
+        function switchRole(url, btnId) {
+            // UI
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(btnId).classList.add('active');
+            
+            // Frame transition
+            const frame = document.getElementById('app-frame');
+            frame.style.opacity = '0';
+            setTimeout(() => {
+                frame.src = url;
+                frame.onload = () => { frame.style.opacity = '1'; };
+            }, 200);
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `✅ ${msg}`;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 3000);
+        }
+
+        function resetDemo() {
+            localStorage.clear();
+            showToast("Demo reset to default state.");
+            const frame = document.getElementById('app-frame');
+            frame.src = frame.src; // reload
+        }
+
+        // Initialize local storage variables if empty
+        if(!localStorage.getItem('demo_initialized')) {
+            resetDemo();
+            localStorage.setItem('demo_initialized', 'true');
+        }
+    </script>
+</body>
+</html>

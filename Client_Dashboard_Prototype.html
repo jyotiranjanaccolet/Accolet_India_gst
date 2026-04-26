@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accolet Client GST Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        darkbg: '#09090b',
+                        cardbg: 'rgba(24, 24, 27, 0.6)',
+                        cardborder: 'rgba(255, 255, 255, 0.08)',
+                        brand: '#3b82f6',
+                        danger: '#ef4444',
+                        warning: '#f59e0b',
+                        success: '#10b981'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            background: radial-gradient(circle at top right, #1e1b4b, #09090b 40%);
+            color: #f8fafc; 
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: var(--tw-colors-cardbg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--tw-colors-cardborder);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .glass-card:hover {
+            transform: translateY(-4px) scale(1.01);
+        }
+        .glow-red { box-shadow: 0 10px 30px -10px rgba(239, 68, 68, 0.3); border-top: 3px solid #ef4444; }
+        .glow-amber { box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.3); border-top: 3px solid #f59e0b; }
+        .glow-green { box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.3); border-top: 3px solid #10b981; }
+        .glass-card:hover.glow-red { box-shadow: 0 15px 40px -5px rgba(239, 68, 68, 0.5); }
+        .glass-card:hover.glow-amber { box-shadow: 0 15px 40px -5px rgba(245, 158, 11, 0.5); }
+        .glass-card:hover.glow-green { box-shadow: 0 15px 40px -5px rgba(16, 185, 129, 0.5); }
+        
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+        }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+        .table-row-hover:hover { background: rgba(255, 255, 255, 0.03); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Header -->
+    <header class="mb-10 flex justify-between items-end">
+        <div>
+            <h1 class="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400 tracking-tight">
+                Accolet GST Intelligence
+            </h1>
+            <p class="text-gray-400 mt-2 text-sm md:text-base">Client: <span class="text-white font-medium">Acme Corp</span> | GSTIN: <span class="text-white font-medium">27AADCB2230M1Z4</span> | Period: <span class="text-white font-medium">April 2026</span></p>
+        </div>
+        <div class="hidden md:flex gap-3">
+            <button class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-sm font-medium transition-colors">
+                <i class="fa-solid fa-sync mr-2"></i> Refresh Data
+            </button>
+        </div>
+    </header>
+
+    <!-- KPI Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="kpi-grid">
+        <!-- Cards injected by JS -->
+    </div>
+
+    <!-- Modal -->
+    <div id="drilldown-modal" class="fixed inset-0 modal-overlay z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-2xl w-11/12 max-w-6xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="modal-content">
+            
+            <!-- Modal Header -->
+            <div class="px-6 py-5 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+                <div class="flex items-center gap-4">
+                    <div id="modal-icon" class="w-10 h-10 rounded-full flex items-center justify-center text-lg"></div>
+                    <div>
+                        <h2 id="modal-title" class="text-xl font-semibold text-white tracking-wide"></h2>
+                        <p id="modal-subtitle" class="text-sm text-gray-400 mt-1"></p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="downloadCSV()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20">
+                        <i class="fa-solid fa-file-excel"></i> Download CSV
+                    </button>
+                    <button onclick="closeModal()" class="w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Note (Statutory Warning) -->
+            <div id="modal-note" class="px-6 py-3 bg-amber-500/10 border-b border-amber-500/20 text-amber-200 text-sm hidden flex items-start gap-3">
+                <i class="fa-solid fa-circle-info mt-0.5"></i>
+                <span id="modal-note-text"></span>
+            </div>
+
+            <!-- Modal Table -->
+            <div class="flex-1 overflow-auto p-6">
+                <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead>
+                        <tr id="modal-thead" class="text-xs uppercase tracking-wider text-gray-400 border-b border-zinc-800">
+                            <!-- Headers injected by JS -->
+                        </tr>
+                    </thead>
+                    <tbody id="modal-tbody" class="text-sm text-gray-300 divide-y divide-zinc-800/50">
+                        <!-- Rows injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-zinc-800 bg-zinc-900/50 flex justify-between items-center text-sm">
+                <span class="text-gray-400" id="modal-row-count"></span>
+                <div class="font-semibold text-white" id="modal-total-value"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // ------------------------------------------------------------------
+        // 1. RAW SAMPLE DATA (Simulating DB / GSP API responses)
+        // ------------------------------------------------------------------
+        
+        const rawData = {
+            gstr2b_airlines: [
+                { airline: 'IndiGo', gstin: '06AACCI1681G1ZH', inv_no: 'INV-IG-4521', date: '15-Apr-2025', igst: 18000 },
+                { airline: 'Air India', gstin: '07AAACN0046A1ZX', inv_no: 'AI-9034', date: '22-Apr-2025', igst: 24500 }
+            ],
+            gstr2b_eligible: 435900, // Net of 17(5)
+            
+            gstr3b: {
+                claimed: { igst: 210000, cgst: 85000, sgst: 85000, total: 380000 },
+                imports: 345000,
+                reversed_4B2: { apr: 50000, may: 0, jun: 55000 },
+                reclaimed_4A5: { apr: 0, may: 20000, jun: 0 },
+                paid_31: { igst: 185000, cgst: 50000, sgst: 50000, total: 285000 },
+                rcm_paid: 6400
+            },
+            
+            gstr1_liability: 299450,
+            
+            icegate_boes: [
+                { boe: 'BOE-001', port: 'Mumbai', date: '05-Apr-2025', desc: 'Electronic Components', igst: 150000 },
+                { boe: 'BOE-002', port: 'Chennai', date: '18-Apr-2025', desc: 'Raw Materials', igst: 195000 }
+            ],
+            
+            ims_pending: [
+                { vendor: 'Vendor A', gstin: '29XXXXX', inv_no: 'INV-A-001', date: '01-Apr-2025', itc: 12000 },
+                { vendor: 'Vendor B', gstin: '07YYYYY', inv_no: 'INV-B-234', date: '05-Apr-2025', itc: 8500 },
+                { vendor: 'Vendor C (39 more)', gstin: '...', inv_no: '...', date: '...', itc: 28000 } // combined for brevity
+            ],
+
+            unclaimed_2b: [
+                { vendor: 'ABC Supplies', gstin: '29AAABC1234', inv_no: 'INV-001', itc_2b: 25000 },
+                { vendor: 'XYZ Traders', gstin: '27XYZPQ5678', inv_no: 'INV-445', itc_2b: 44900 }
+            ],
+            
+            purchase_register: [
+                // RCM Data
+                { vendor: 'Mahavir Transport', desc: 'GTA Freight', date: '10-Apr-2025', taxable: 50000, rcm_applicable: true, rcm_val: 4500 },
+                { vendor: 'Anand & Co. Advocates', desc: 'Legal', date: '15-Apr-2025', taxable: 40000, rcm_applicable: true, rcm_val: 3500 },
+                // Rule 37 Data (Today = 26-Apr-2026 for simulation)
+                { vendor: 'Shree Industries', inv_no: 'SI-2025-089', date: '15-Sep-2025', itc_month: 'May-25', days: 341, itc: 18000, int_18: 3022, int_24: 4029, is_rule37: true },
+                { vendor: 'ABC Components', inv_no: 'ABC-441', date: '01-Aug-2025', itc_month: 'Sep-25', days: 218, itc: 9000, int_18: 968, int_24: 1291, is_rule37: true },
+                // Sec 17(5) Data
+                { vendor: 'Hotel Taj', inv_no: 'TAJ-456', desc: 'Business Lunch', code: '9963', itc: 7000, section: '17(5)(b)(i)', exception: 'None', is_175: true },
+                { vendor: 'Maruti Dealer', inv_no: 'MD-089', desc: 'Company Car', code: '8703', itc: 5000, section: '17(5)(a)', exception: 'Goods vehicle?', is_175: true },
+                { vendor: 'Star Health', inv_no: 'SHI-012', desc: 'Health Insurance', code: '—', itc: 3500, section: '17(5)(b)(iii)', exception: 'Mandatory by law?', is_175: true }
+            ]
+        };
+
+        // ------------------------------------------------------------------
+        // 2. KPI CALCULATIONS & FORMATTING
+        // ------------------------------------------------------------------
+        
+        const fmt = (num) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
+
+        // Core array that drives the UI
+        let dashboardKPIs = [];
+        let currentModalData = null;
+
+        function calculateKPIs() {
+            // KPI 1: Missed Airlines
+            const k1Val = rawData.gstr2b_airlines.reduce((sum, item) => sum + item.igst, 0);
+            const k1Rows = rawData.gstr2b_airlines.map(i => [i.airline, i.gstin, i.inv_no, i.date, fmt(i.igst), "Missing from Books"]);
+
+            // KPI 2: ITC Claimed vs Available
+            const k2Gap = rawData.gstr3b.claimed.total - (rawData.gstr2b_eligible + 15500); // adding back 17(5) for simple calculation base
+            const k2Rows = [
+                ["IGST", fmt(rawData.gstr3b.claimed.igst), fmt(205000), "+" + fmt(5000), "Excess"],
+                ["CGST", fmt(rawData.gstr3b.claimed.cgst), fmt(80500), "+" + fmt(4500), "Excess"],
+                ["SGST", fmt(rawData.gstr3b.claimed.sgst), fmt(80500), "+" + fmt(4500), "Excess"],
+                ["Total", fmt(rawData.gstr3b.claimed.total), fmt(366000), "+" + fmt(14000), "Critical Risk"]
+            ];
+
+            // KPI 3: Import ITC
+            const k3Matched = rawData.icegate_boes.reduce((sum, item) => sum + item.igst, 0);
+            const k3Rows = rawData.icegate_boes.map(i => [i.boe, i.port, i.date, i.desc, fmt(i.igst), fmt(i.igst), "✅ Matched"]);
+
+            // KPI 4: Pending Reclaim
+            const k4Rev = rawData.gstr3b.reversed_4B2.apr + rawData.gstr3b.reversed_4B2.jun;
+            const k4Rec = rawData.gstr3b.reclaimed_4A5.may;
+            const k4Pending = k4Rev - k4Rec;
+            const k4Rows = [
+                ["Apr-25", fmt(50000), fmt(20000), fmt(30000), "Pay vendor → reclaim"],
+                ["May-25", fmt(0), fmt(0), fmt(30000), "Carried forward"],
+                ["Jun-25", fmt(55000), fmt(0), fmt(85000), "Reclaim in next 3B"]
+            ];
+
+            // KPI 5: Pending IMS
+            const k5Val = rawData.ims_pending.reduce((sum, item) => sum + item.itc, 0);
+            const k5Rows = rawData.ims_pending.map(i => [i.gstin, i.vendor, i.inv_no, i.date, fmt(i.itc), "218 days", "Accept in Portal"]);
+
+            // KPI 6: Unclaimed ITC
+            const k6Val = rawData.gstr2b_eligible - 366000; // 366k claimed eligible
+            const k6Rows = rawData.unclaimed_2b.map(i => [i.gstin, i.vendor, i.inv_no, fmt(i.itc_2b), "₹0", fmt(i.itc_2b), "Not booked"]);
+
+            // KPI 7: GSTR-1 vs 3B
+            const k7Gap = rawData.gstr1_liability - rawData.gstr3b.paid_31.total;
+            const k7Rows = [
+                ["IGST (B2B/B2CL)", fmt(185000), fmt(185000), "₹0", "✅"],
+                ["CGST (All)", fmt(57225), fmt(50000), "+" + fmt(7225), "🔴"],
+                ["SGST (All)", fmt(57225), fmt(50000), "+" + fmt(7225), "🔴"]
+            ];
+
+            // KPI 8: RCM
+            const rcmItems = rawData.purchase_register.filter(i => i.rcm_applicable);
+            const k8Liab = rcmItems.reduce((sum, item) => sum + item.rcm_val, 0);
+            const k8Gap = k8Liab - rawData.gstr3b.rcm_paid;
+            const k8Rows = rcmItems.map(i => [i.vendor, i.desc, i.date, fmt(i.taxable), fmt(i.rcm_val), "₹0", fmt(i.rcm_val)]);
+
+            // KPI 9: Rule 37
+            const r37Items = rawData.purchase_register.filter(i => i.is_rule37);
+            const k9Itc = r37Items.reduce((sum, item) => sum + item.itc, 0);
+            const k9Rows = r37Items.map(i => [i.vendor, i.inv_no, i.date, i.itc_month, i.days, fmt(i.itc), fmt(i.int_18), fmt(i.int_24), "Verify", "Action Req."]);
+
+            // KPI 10: Sec 17(5)
+            const s175Items = rawData.purchase_register.filter(i => i.is_175);
+            const k10Val = s175Items.reduce((sum, item) => sum + item.itc, 0);
+            const k10Rows = s175Items.map(i => [i.vendor, i.inv_no, i.desc, i.code, fmt(i.itc), i.section, i.exception, "Pending"]);
+
+            dashboardKPIs = [
+                { id: 1, title: "Missed Airlines ITC", val: fmt(k1Val), sub: "2 Invoices Missing", color: "amber", icon: "fa-plane", cols: ["Airline", "Supplier GSTIN", "Invoice No", "Date", "IGST", "Status"], rows: k1Rows },
+                { id: 2, title: "ITC Claimed vs Available", val: fmt(k2Gap), sub: "Excess Claimed", color: "red", icon: "fa-scale-unbalanced", cols: ["Tax Head", "Claimed 3B", "Available 2B", "Variance", "Status"], rows: k2Rows, note: "DRC-01C Notice Trigger: Auto-generated notice for excess ITC claims under Rule 36(4)." },
+                { id: 3, title: "Import ITC Claimed", val: fmt(k3Matched), sub: "Fully Reconciled", color: "green", icon: "fa-ship", cols: ["BOE Number", "Port", "Date", "Goods Desc", "IGST Paid", "IGST 3B", "Match Status"], rows: k3Rows },
+                { id: 4, title: "Pending Reclaim ITC", val: fmt(k4Pending), sub: "To be reclaimed", color: "amber", icon: "fa-rotate-left", cols: ["Month", "Reversed (4B2)", "Reclaimed (4A5)", "Net Pending", "Action Due"], rows: k4Rows },
+                { id: 5, title: "Pending IMS Invoices", val: fmt(k5Val), sub: "Lapse Risk - Sec 16(4)", color: "amber", icon: "fa-file-circle-exclamation", cols: ["Supplier GSTIN", "Supplier Name", "Invoice No", "Date", "ITC", "Deadline", "Action"], rows: k5Rows, note: "Pending invoices do NOT enter GSTR-2B. Accept before 30-Nov-2026 or this credit permanently lapses." },
+                { id: 6, title: "Unclaimed ITC (2B)", val: fmt(k6Val), sub: "Eligible credit left", color: "amber", icon: "fa-money-bill-wave", cols: ["Supplier GSTIN", "Supplier Name", "Invoice No", "2B ITC", "3B Claimed", "Unclaimed", "Reason"], rows: k6Rows, note: "This excludes blocked credit flagged in Sec 17(5). This is genuinely eligible working capital." },
+                { id: 7, title: "GSTR-1 vs 3B Liability", val: fmt(k7Gap), sub: "Short Paid Gap", color: "red", icon: "fa-file-invoice-dollar", cols: ["Section", "GSTR-1 Liability", "GSTR-3B Paid", "Gap", "Risk"], rows: k7Rows, note: "DRC-01B Notice Trigger: GSTR-1 declared liability exceeds 3B tax paid." },
+                { id: 8, title: "RCM Liability vs Paid", val: fmt(k8Gap), sub: "Unpaid RCM", color: "red", icon: "fa-building-columns", cols: ["Vendor", "Service Type", "Date", "Taxable", "RCM Applicable", "Paid in 3B", "Gap"], rows: k8Rows },
+                { id: 9, title: "Rule 37 Risk (>180 Days)", val: fmt(k9Itc), sub: "+ Interest Range", color: "red", icon: "fa-clock", cols: ["Vendor", "Inv No", "Date", "ITC Month", "Days", "ITC Risk", "Int @18%", "Int @24%", "Rule 88B", "Action"], rows: k9Rows, note: "Interest rate depends on whether ITC was utilised (18-24%). If ECL balance was sufficient, interest may be NIL (Rule 88B)." },
+                { id: 10, title: "Sec 17(5) Blocked Credit", val: fmt(k10Val), sub: "CA Review Required", color: "amber", icon: "fa-ban", cols: ["Vendor", "Inv No", "Description", "HSN/SAC", "ITC Claimed", "Blocked Section", "Exception Check", "CA Decision"], rows: k10Rows, note: "SYSTEM FLAG - Advisory only. A CA must confirm before any reversal is made." }
+            ];
+        }
+
+        // ------------------------------------------------------------------
+        // 3. UI RENDERING & INTERACTION
+        // ------------------------------------------------------------------
+
+        function renderGrid() {
+            const grid = document.getElementById('kpi-grid');
+            grid.innerHTML = '';
+            
+            const colorMap = {
+                'red': { text: 'text-red-400', bg: 'bg-red-400/10', glow: 'glow-red' },
+                'amber': { text: 'text-amber-400', bg: 'bg-amber-400/10', glow: 'glow-amber' },
+                'green': { text: 'text-emerald-400', bg: 'bg-emerald-400/10', glow: 'glow-green' }
+            };
+
+            dashboardKPIs.forEach((kpi, idx) => {
+                const c = colorMap[kpi.color];
+                const card = document.createElement('div');
+                card.className = `glass-card rounded-2xl p-6 relative overflow-hidden group ${c.glow}`;
+                card.onclick = () => openModal(idx);
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-10 h-10 rounded-xl ${c.bg} ${c.text} flex items-center justify-center text-lg">
+                            <i class="fa-solid ${kpi.icon}"></i>
+                        </div>
+                        <div class="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-xs text-gray-300">
+                            KPI ${kpi.id}
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 text-sm font-medium mb-1 truncate">${kpi.title}</h3>
+                        <div class="text-2xl font-bold text-white mb-1 tracking-tight">${kpi.val}</div>
+                        <div class="text-xs ${c.text} font-medium flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full ${kpi.color === 'red' ? 'bg-red-400' : (kpi.color === 'amber' ? 'bg-amber-400' : 'bg-emerald-400')} animate-pulse"></span>
+                            ${kpi.sub}
+                        </div>
+                    </div>
+                    <div class="absolute bottom-0 right-0 w-24 h-24 bg-white/5 rounded-tl-full -mr-4 -mb-4 transition-transform group-hover:scale-110"></div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openModal(idx) {
+            const data = dashboardKPIs[idx];
+            currentModalData = data;
+
+            document.getElementById('modal-title').textContent = data.title;
+            document.getElementById('modal-subtitle').textContent = data.sub;
+            document.getElementById('modal-total-value').textContent = "Total: " + data.val;
+            document.getElementById('modal-row-count').textContent = `Showing ${data.rows.length} records`;
+            
+            const iconEl = document.getElementById('modal-icon');
+            iconEl.className = `w-10 h-10 rounded-full flex items-center justify-center text-lg ${
+                data.color === 'red' ? 'bg-red-400/20 text-red-400' : 
+                (data.color === 'amber' ? 'bg-amber-400/20 text-amber-400' : 'bg-emerald-400/20 text-emerald-400')
+            }`;
+            iconEl.innerHTML = `<i class="fa-solid ${data.icon}"></i>`;
+
+            const noteEl = document.getElementById('modal-note');
+            if(data.note) {
+                document.getElementById('modal-note-text').textContent = data.note;
+                noteEl.classList.remove('hidden');
+            } else {
+                noteEl.classList.add('hidden');
+            }
+
+            // Render Table
+            const thead = document.getElementById('modal-thead');
+            thead.innerHTML = data.cols.map(c => `<th class="px-4 py-3 font-medium">${c}</th>`).join('');
+            
+            const tbody = document.getElementById('modal-tbody');
+            tbody.innerHTML = data.rows.map(row => `
+                <tr class="table-row-hover transition-colors">
+                    ${row.map((cell, i) => `<td class="px-4 py-3 ${i===0?'font-medium text-white':''}">${cell}</td>`).join('')}
+                </tr>
+            `).join('');
+
+            // Show modal
+            const modal = document.getElementById('drilldown-modal');
+            const content = document.getElementById('modal-content');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('drilldown-modal');
+            const content = document.getElementById('modal-content');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => { currentModalData = null; }, 300);
+        }
+
+        function downloadCSV() {
+            if(!currentModalData) return;
+            const data = currentModalData;
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += data.cols.join(",") + "\r\n";
+            data.rows.forEach(row => {
+                let formattedRow = row.map(str => `"${str.toString().replace(/"/g, '""')}"`).join(",");
+                csvContent += formattedRow + "\r\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Accolet_KPI_${data.id}_${data.title.replace(/\s+/g, '_')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateKPIs();
+            renderGrid();
+        });
+
+        // Close modal on outside click
+        document.getElementById('drilldown-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'drilldown-modal') closeModal();
+        });
+    </script>
+</body>
+</html>
