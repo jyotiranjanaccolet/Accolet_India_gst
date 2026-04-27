@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accolet IndiaGST! - CA Operations Dashboard</title>
+    <title>Accolet IndiaGST! - L4 Preparer Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -135,13 +135,13 @@
 
     <div class="fixed-header-wrapper">
         <div class="top-bar">
-            <div><strong>Accolet IndiaGST!</strong> — CA Operations Portal</div>
+            <div><strong>Accolet IndiaGST!</strong> — L4 Operations Portal</div>
             <div>l4.preparer@accolet.com &nbsp;|&nbsp; Logout</div>
         </div>
 
         <div class="hero-header">
             <div>
-                <h1 class="hero-title">CA Working Dashboard</h1>
+                <h1 class="hero-title">L4 Working Dashboard</h1>
                 <div class="header-controls">
                     <select class="filter-select" style="font-weight: bold; background: white; color: var(--navy-main);">
                         <option>Active Client: Epson Limited</option>
@@ -199,6 +199,8 @@
             <div class="workspace-header">
                 <h2 style="margin: 0; color: var(--navy-main); font-size: 1.2rem;">GSTR-1 Preparation</h2>
                 <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-primary">📥 Import e-Invoice</button>
+                    <button class="btn btn-outline">⬇️ Download Working Files</button>
                     <button class="btn btn-outline">⬇️ Govt Utility Excel</button>
                     <button class="btn btn-teal" onclick="sendToReview('GSTR-1')">➡️ Send to L3 for Review</button>
                 </div>
@@ -241,9 +243,6 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>
-                <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
-                    <button class="btn btn-teal" onclick="sendToReview('GSTR-1')">📤 Send to Client</button>
                 </div>
             </div>
 
