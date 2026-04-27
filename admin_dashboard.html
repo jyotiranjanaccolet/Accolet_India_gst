@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accolet IndiaGST! - Admin Dashboard</title>
+    <style>
+        :root {
+            --bg-body: #e8eff3;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #475569;
+            --teal-main: #18a084;
+            --navy-main: #142433;
+            --blue-main: #2b74c9;
+            --red-main: #e11d48;
+            --amber-main: #d97706;
+            --green-main: #059669;
+            --border-soft: #cbd5e1;
+        }
+
+        * {
+            font-family: 'Book Antiqua', Georgia, serif !important;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-body); color: var(--text-dark);
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+        }
+
+        /* HEADER */
+        .fixed-header-wrapper { background: var(--navy-main); flex-shrink: 0; border-bottom: 3px solid var(--teal-main); }
+        .top-bar {
+            background: linear-gradient(to right, var(--navy-main), #0f172a);
+            color: #ffffff; padding: 6px 2rem; display: flex; justify-content: space-between;
+            font-size: 0.85rem; font-weight: bold;
+        }
+        .hero-header { padding: 1rem 2rem; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .hero-title { font-size: 1.8rem; margin: 0 0 8px 0; color: #f8fafc; }
+        .header-controls { display: flex; gap: 12px; align-items: center; }
+
+        .client-badge { background: rgba(24, 160, 132, 0.2); padding: 0.8rem 1.2rem; border-radius: 6px; border: 1px solid rgba(24, 160, 132, 0.5); }
+
+        /* TABS */
+        .tabs-container { background: white; padding: 0 2rem; display: flex; border-bottom: 1px solid var(--border-soft); }
+        .tab-link {
+            background: none; border: none; padding: 0.8rem 1rem;
+            font-weight: bold; font-size: 1.05rem; color: var(--text-muted); cursor: pointer;
+            border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap;
+        }
+        .tab-link:hover { color: var(--teal-main); }
+        .tab-link.active { color: var(--teal-main); border-bottom-color: var(--teal-main); }
+
+        /* MAIN CONTENT */
+        .main-container { padding: 1rem 2rem; flex-grow: 1; display: flex; flex-direction: column; min-height: 0; }
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; flex-grow: 1; height: 100%; overflow-y: auto; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* SUB TABS */
+        .sub-tabs-container { display: flex; gap: 4px; margin-bottom: 0.5rem; padding-bottom: 4px; border-bottom: 1px solid var(--border-soft); }
+        .sub-tab-link { 
+            background: none; border: 1px solid transparent; padding: 0.4rem 0.8rem; font-family: 'Book Antiqua', serif; 
+            font-weight: bold; font-size: 0.9rem; color: var(--text-muted); cursor: pointer; border-radius: 4px; transition: 0.2s; 
+        }
+        .sub-tab-link:hover { background: var(--bg-body); color: var(--navy-main); }
+        .sub-tab-link.active-sub { background: var(--teal-light); color: var(--teal-main); border: 1px solid var(--teal-main); }
+
+        .sub-tab-content { display: none; flex-direction: column; flex-grow: 1; height: 100%; }
+        .sub-tab-content.active { display: flex; }
+
+        /* CARDS & TABLES */
+        .card { background: var(--card-bg); border-radius: 8px; padding: 1.2rem; border: 1px solid rgba(0,0,0,0.05); }
+        .table-container {
+            background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.05); overflow-y: auto; height: 100%;
+        }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { background: #f1f5f9; color: var(--navy-main); font-weight: bold; text-align: left; padding: 1rem; border-bottom: 1px solid var(--border-soft); font-size: 0.9rem; position: sticky; top: 0; z-index: 10; }
+        td { padding: 1rem; border-bottom: 1px solid var(--border-soft); font-size: 0.95rem; vertical-align: middle; background: white; }
+        
+        .btn {
+            padding: 0.6rem 1rem; border-radius: 6px; font-weight: bold;
+            font-size: 0.85rem; cursor: pointer; border: none; transition: 0.2s; white-space: nowrap;
+        }
+        .btn-sm { padding: 0.4rem 0.6rem; font-size: 0.75rem; }
+        .btn-primary { background: var(--blue-main); color: white; }
+        .btn-teal { background: var(--teal-main); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border-soft); color: var(--text-dark); }
+        
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .badge-amber { background: var(--amber-light); color: var(--amber-main); border: 1px solid var(--amber-main);}
+        .badge-green { background: #ecfdf5; color: var(--green-main); border: 1px solid var(--green-main);}
+        
+        .workspace-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc; transition: .4s; border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--teal-main); }
+        input:checked + .slider:before { transform: translateX(20px); }
+    </style>
+</head>
+<body>
+
+    <div class="fixed-header-wrapper">
+        <div class="top-bar">
+            <div>Accolet IndiaGST! — System Administration</div>
+            <div>admin@accolet.com &nbsp;|&nbsp; Logout</div>
+        </div>
+
+        <div class="hero-header">
+            <div>
+                <h1 class="hero-title">Admin Control Center</h1>
+                <div class="header-controls" style="font-size: 0.9rem;">
+                    Manage Users, Assign Clients, and Configure Feature Access
+                </div>
+            </div>
+            <div class="client-badge">
+                <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); text-transform: uppercase;">Logged In As</div>
+                <div style="font-size: 1.2rem; font-weight: bold; color: white;">L0 Super Admin</div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <button class="tab-link active" onclick="openTab(event, 'tab-clients')">1. Client Onboarding</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-users')">2. User Management</button>
+            <button class="tab-link" onclick="openTab(event, 'tab-features')">3. Feature Enablement Controls</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+
+        <!-- TAB 1: CLIENT ONBOARDING -->
+        <div id="tab-clients" class="tab-content active">
+            <div class="workspace-header">
+                <h2 style="margin: 0; color: var(--navy-main);">Client Roster & Assignment</h2>
+                <button class="btn btn-teal">➕ Onboard New Client</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>GSTIN</th>
+                            <th>Partner / L2</th>
+                            <th>Assigned Reviewer (L3)</th>
+                            <th>Assigned Preparer (L4)</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Epson Limited</strong></td>
+                            <td>27AABCU9603R1ZX</td>
+                            <td>Bibuti (L2)</td>
+                            <td>Ramesh (L3)</td>
+                            <td>Aayapa (L4)</td>
+                            <td><span class="status-badge badge-green">Active</span></td>
+                            <td><button class="btn btn-outline btn-sm">Edit Assignment</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Acme Corp</strong></td>
+                            <td>29BBDCU9603R2YY</td>
+                            <td>Bibuti (L2)</td>
+                            <td>Ramesh (L3)</td>
+                            <td>Suresh (L4)</td>
+                            <td><span class="status-badge badge-green">Active</span></td>
+                            <td><button class="btn btn-outline btn-sm">Edit Assignment</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>TechNova Solutions</strong></td>
+                            <td>07AAACU9603R1ZZ</td>
+                            <td>Unassigned</td>
+                            <td>Unassigned</td>
+                            <td>Unassigned</td>
+                            <td><span class="status-badge badge-amber">Pending Setup</span></td>
+                            <td><button class="btn btn-primary btn-sm">Assign Staff</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 2: USER MANAGEMENT -->
+        <div id="tab-users" class="tab-content">
+            <div class="workspace-header">
+                <h2 style="margin: 0; color: var(--navy-main);">Internal Users & Roles</h2>
+                <button class="btn btn-primary">➕ Add New User</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email ID</th>
+                            <th>Role / Tier</th>
+                            <th>Clients Assigned</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Bibuti Partner</strong></td>
+                            <td>bibuti@accolet.com</td>
+                            <td>L2 - Partner</td>
+                            <td>12</td>
+                            <td><span class="status-badge badge-green">Active</span></td>
+                            <td><button class="btn btn-outline btn-sm">Manage Role</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ramesh Reviewer</strong></td>
+                            <td>ramesh@accolet.com</td>
+                            <td>L3 - Reviewer</td>
+                            <td>5</td>
+                            <td><span class="status-badge badge-green">Active</span></td>
+                            <td><button class="btn btn-outline btn-sm">Manage Role</button></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Aayapa Preparer</strong></td>
+                            <td>aayapa@accolet.com</td>
+                            <td>L4 - Preparer</td>
+                            <td>3</td>
+                            <td><span class="status-badge badge-green">Active</span></td>
+                            <td><button class="btn btn-outline btn-sm">Manage Role</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: FEATURE ENABLEMENT -->
+        <div id="tab-features" class="tab-content">
+            <div class="sub-tabs-container">
+                <button class="sub-tab-link feature-link active-sub" onclick="openSubTab(event, 'feature-client', 'feature')">Enablement by Client</button>
+                <button class="sub-tab-link feature-link" onclick="openSubTab(event, 'feature-tier', 'feature')">Access by User Tier</button>
+            </div>
+
+            <div id="feature-client" class="sub-tab-content feature-content active">
+                <div class="workspace-header">
+                    <h2 style="margin: 0; color: var(--navy-main);">Module Enablement by Client</h2>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Turn off specific modules for clients to hide them from their portals.</div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Client Name</th>
+                                <th style="text-align: center;">GSTR-1</th>
+                                <th style="text-align: center;">GSTR-3B</th>
+                                <th style="text-align: center;">GSTR-6 (ISD)</th>
+                                <th style="text-align: center;">GSTR-9 & 9C</th>
+                                <th style="text-align: center;">Notice Management</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Epson Limited</strong></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Acme Corp</strong></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox"><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox"><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox"><span class="slider"></span></label></td>
+                            </tr>
+                            <tr>
+                                <td><strong>TechNova Solutions</strong></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox"><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="feature-tier" class="sub-tab-content feature-content">
+                <div class="workspace-header">
+                    <h2 style="margin: 0; color: var(--navy-main);">Module Access by User Tier</h2>
+                    <div style="color: var(--text-muted); font-size: 0.9rem;">Global overrides for user roles.</div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User Role</th>
+                                <th style="text-align: center;">Send to Client Approval</th>
+                                <th style="text-align: center;">Sign & File Returns</th>
+                                <th style="text-align: center;">Assign Notices</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>L2 - Partner</strong></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked><span class="slider"></span></label></td>
+                            </tr>
+                            <tr>
+                                <td><strong>L3 - Reviewer</strong></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" checked disabled><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox"><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox"><span class="slider"></span></label></td>
+                            </tr>
+                            <tr>
+                                <td><strong>L4 - Preparer</strong></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" disabled><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" disabled><span class="slider"></span></label></td>
+                                <td style="text-align: center;"><label class="toggle-switch"><input type="checkbox" disabled><span class="slider"></span></label></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function openTab(evt, tabId) {
+            var tabContents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabContents.length; i++) tabContents[i].classList.remove("active");
+            var tabLinks = document.getElementsByClassName("tab-link");
+            for (var i = 0; i < tabLinks.length; i++) tabLinks[i].classList.remove("active");
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        function openSubTab(evt, tabId, groupClass) {
+            var tabContents = document.getElementsByClassName(groupClass + "-content");
+            for (var i = 0; i < tabContents.length; i++) tabContents[i].classList.remove("active");
+            var tabLinks = document.getElementsByClassName(groupClass + "-link");
+            for (var i = 0; i < tabLinks.length; i++) tabLinks[i].classList.remove("active-sub");
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active-sub");
+        }
+
+        // Auto-functionalize all other buttons for the demo
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('button').forEach(btn => {
+                if(!btn.getAttribute('onclick')) {
+                    btn.onclick = function() {
+                        let actionText = this.innerText.replace(/[^\x00-\x7F]/g, '').trim();
+                        if(!actionText) actionText = "Action";
+                        if(window.parent !== window && window.parent.postMessage) {
+                            window.parent.postMessage({ type: 'SHOW_TOAST', message: `Executing: ${actionText}... Done!` }, '*');
+                        } else {
+                            alert(`Demo Action: ${actionText} executed successfully!`);
+                        }
+                    };
+                }
+            });
+        });
+    </script>
+</body>
+</html>
