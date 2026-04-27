@@ -21,9 +21,9 @@
         
         .role-switch { display: flex; gap: 8px; background: #0f172a; padding: 6px; border-radius: 8px; border: 1px solid #334155; }
         .role-btn {
-            background: transparent; color: #94a3b8; border: none; padding: 8px 16px;
-            border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer;
-            transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+            background: transparent; color: #94a3b8; border: none; padding: 6px 10px;
+            border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap;
         }
         .role-btn:hover { color: white; background: rgba(255,255,255,0.05); }
         .role-btn.active { background: #3b82f6; color: white; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4); }
@@ -59,13 +59,19 @@
                 📋 Project Plan
             </button>
             <button class="role-btn active" id="btn-ca" onclick="switchRole('ca_dashboard.html', 'btn-ca')">
-                👨‍💻 1. CA Workspace
+                👨‍💻 1. L4 Workspace
+            </button>
+            <button class="role-btn" id="btn-l3" onclick="switchRole('l3_dashboard.html', 'btn-l3')">
+                🔍 2. L3 Workspace
             </button>
             <button class="role-btn" id="btn-client" onclick="switchRole('kpi_dashboard.html', 'btn-client')">
-                🏢 2. Client Dashboard
+                🏢 3. Client Dashboard
             </button>
             <button class="role-btn" id="btn-partner" onclick="switchRole('partner_dashboard.html', 'btn-partner')">
-                👨‍💼 3. Partner Console
+                👨‍💼 4. L2/L1 Partner Console
+            </button>
+            <button class="role-btn" id="btn-admin" onclick="switchRole('admin_dashboard.html', 'btn-admin')">
+                ⚙️ 5. L0 Admin Console
             </button>
         </div>
         
